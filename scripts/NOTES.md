@@ -1222,3 +1222,41 @@ and strings), so it would mean patching the installed plugin, which would not su
 **Watch for**: scrolling now happens on the host, not on CodeMirror's own `.cm-scroller`, so the
 view may not follow the cursor when typing past the bottom of a capped cell. If it does not,
 the cap has to come from inside marimo instead.
+
+## 77. Data files, and why the repository is public
+
+The two datasets the book loads -- `data.dat` (5 MB, FT1 exercise 6) and `velocities.dat` (NI
+exercise 6) -- live in `data/` and are fetched at runtime from this repository's `main` branch.
+There is no filesystem in the browser, so they have to come over the network; `load_data` falls
+back to the local copy under `data/` at build time.
+
+This is the one thing that forces the repository's visibility: **raw.githubusercontent.com does
+not serve a private repository without a token**, and there is nowhere to put a token in a page
+that 200 students load. The sibling `lecture-tn2626-statistical-physics` is private, so this is a
+deliberate difference, taken so the book depends on nothing outside itself -- the alternative was
+to keep fetching from the original TUDelft-books repository, which works today only because that
+repository happens to be public and stay that way.
+
+Verified after pushing, against the URL actually baked into the pages:
+
+```
+data.dat        HTTP 200, 5049921 bytes
+velocities.dat  HTTP 200,    1241 bytes
+access-control-allow-origin: *
+```
+
+That last header matters as much as the 200: Pyodide's `open_url` is a cross-origin request from
+the site to raw.githubusercontent, and would fail silently without it.
+
+**Renaming the repository, moving it to an organisation, or making it private all break the
+book.** `DATA_URL` is baked into every chapter's `{marimo-config}` header.
+
+## 78. What is under version control
+
+`scripts/` and `README.md` are committed but excluded from the book build (`myst.yml: exclude`).
+`.jupyter-book-marimo/` is not committed: it is a byte-identical copy of the plugin's shipped
+assets, written at build time.
+
+The chapters are generated files that are now edited by hand, so **the converter is frozen** --
+re-running it would discard every hand edit recorded in note 72 and after. It stays in the tree
+because these notes are only legible next to the code they describe.
