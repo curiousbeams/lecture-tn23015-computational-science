@@ -23,7 +23,7 @@ uv run myst start
 Deployment is run by hand, not from CI:
 
 ```bash
-curvenote submit curious-beams --kind article --collection articles
+curvenote submit curious-beams --kind lecture --collection lectures
 ```
 
 There are deliberately no GitHub Actions here. Curvenote's reusable workflows run the CLI inside
