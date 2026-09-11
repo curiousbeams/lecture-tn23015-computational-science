@@ -1,0 +1,13 @@
+[project]
+name = "lecture-tn23015-computational-science"
+version = "0.1.0"
+description = "Computational Science interactive textbook (TN23015), MyST + marimo"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "jupyter-book-marimo>=0.0.3",
+    "marimo>=0.23.16",
+    "matplotlib>=3.10",
+    "numpy>=2.0",
+    "scipy>=1.14",
+]

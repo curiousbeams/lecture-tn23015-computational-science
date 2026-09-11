@@ -1,0 +1,18 @@
+/* Cap the height of the in-page code editors.
+
+   A quarter of the book's cells run over 30 lines and the longest is 64, which pushes the output
+   belonging to them off the screen.
+
+   The editor itself is unreachable from here: marimo's islands runtime mounts each cell's UI
+   behind its own shadow root, so `.cm-editor` matches nothing in the document (measured: 0
+   editors in the light DOM, 58 open shadow roots). What *is* reachable is the shadow host --
+   `<marimo-code-editor>` is an ordinary light-DOM element, and its box is styleable from outside
+   even though its contents are not.
+
+   `display: block` is the part that matters: a custom element is `display: inline` by default,
+   and `max-height` does nothing on an inline box. */
+marimo-code-editor {
+  display: block;
+  max-height: 28rem;
+  overflow: auto;
+}

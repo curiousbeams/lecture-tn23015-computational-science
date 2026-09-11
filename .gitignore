@@ -1,0 +1,7 @@
+_build/
+node_modules/
+.DS_Store
+.ipynb_checkpoints/
+.venv/
+__pycache__/
+.jupyter-book-marimo/

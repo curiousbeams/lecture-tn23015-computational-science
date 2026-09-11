@@ -1,0 +1,120 @@
+# See docs at: https://mystmd.org/guide/frontmatter
+version: 1
+project:
+  id: curious-beams-lecture-tn23015-computational-science
+  title: TN23015 | Computational Science
+  short_title: Computational Science
+  description: An interactive computational science textbook, teaching numerical methods for physics in the browser. Originally developed for TN2513 at Delft University of Technology, ported to MyST and marimo for TN23015.
+  keywords:
+    - Computational Science
+    - Numerical Differentiation
+    - Numerical Integration
+    - Root Finding
+    - Linear Algebra
+    - Fourier Transforms
+    - Random Numbers
+    - Ordinary Differential Equations
+    - Partial Differential Equations
+  github: https://github.com/curiousbeams/lecture-tn23015-computational-science
+  open_access: true
+  license: CC-BY-4.0
+  date: 2026-11-10
+  exports:
+    - format: meca
+  exclude:
+    - README.md
+    - scripts/**   # porting notes and converter sources, not book content
+  plugins:
+    - type: executable
+      path: .venv/bin/jupyter-book-marimo
+  authors:
+    # --- TN23015 instructors, Q2 2026-2027 ---
+    - id: gvarnavides
+      name: Georgios Varnavides
+      email: g.varnavides@tudelft.nl
+      orcid: 0000-0001-8338-3323
+      affiliations:
+        - id: imphys
+          department: Imaging Physics, Applied Sciences
+          institution: Delft University of Technology
+          address: Gebouw 22, Lorentzweg 1, 2628 CJ, Delft, NL
+          ror: 02e2c7k09
+      roles:
+        - Project administration
+        - Software
+        - Validation
+        - Visualization
+        - Writing - review & editing
+    - id: lathouwers
+      name: Danny Lathouwers
+      orcid: 0000-0003-3810-1926
+      email: d.lathouwers@tudelft.nl
+      affiliations:
+        - id: rst
+          department: Radiation, Science, and Technology, Applied Sciences
+          institution: Delft University of Technology
+          address: Gebouw 22, Lorentzweg 1, 2628 CJ, Delft, NL
+          ror: 02e2c7k09
+      roles:
+        - Project administration
+        - Validation
+        - Writing - review & editing
+    # --- Original authors of the TN2513 textbook (CC BY 4.0) ---
+    - id: steele
+      name: Gary Steele
+      orcid: 0000-0003-1032-6226
+      affiliations:
+        - id: qn
+          department: Quantum Nanoscience, Applied Sciences
+          institution: Delft University of Technology
+          address: Gebouw 22, Lorentzweg 1, 2628 CJ, Delft, NL
+          ror: 02e2c7k09
+      roles:
+        - Conceptualization
+        - Writing - original draft
+    - id: kalkman
+      name: Jeroen Kalkman
+      orcid: 0000-0003-1698-7842
+      affiliations: [imphys]
+      roles:
+        - Conceptualization
+        - Writing - original draft
+    - id: spriggs
+      name: Thomas Spriggs
+      orcid: 0000-0001-7513-6437
+      affiliations: [qn]
+      roles:
+        - Software
+    - id: greplova
+      name: Eliska Greplova
+      orcid: 0000-0003-3369-2544
+      affiliations: [qn]
+      roles:
+        - Conceptualization
+        - Writing - review & editing
+  abbreviations:
+    ODE: Ordinary Differential Equation
+    PDE: Partial Differential Equation
+    FFT: Fast Fourier Transform
+    DFT: Discrete Fourier Transform
+    RK4: fourth-order Runge-Kutta
+    FTCS: Forward-Time Central-Space
+    RC: resistor-capacitor
+  toc:
+    - file: 00.index.md
+    - file: 00b.about.md
+    - file: 01.numerical-differentiation.md
+    - file: 02.numerical-integration.md
+    - file: 03.root-finding.md
+    - file: 04.linear-algebra.md
+    - file: 05.fourier-transforms-1.md
+    - file: 06.fourier-transforms-2.md
+    - file: 07.random-numbers.md
+    - file: 08.ordinary-differential-equations-1.md
+    - file: 09.ordinary-differential-equations-2.md
+    - file: 10.partial-differential-equations-1.md
+    - file: 11.partial-differential-equations-2.md
+site:
+  template: book-theme
+  options:
+    style: ./static/custom.css
