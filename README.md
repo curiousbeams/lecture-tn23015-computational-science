@@ -18,6 +18,23 @@ uv sync
 uv run myst start
 ```
 
+## Deploying
+
+Deployment is run by hand, not from CI:
+
+```bash
+curvenote submit curious-beams --kind article --collection articles
+```
+
+There are deliberately no GitHub Actions here. Curvenote's reusable workflows run the CLI inside
+their own container with no step in between for installing project dependencies, and this book
+cannot build without them: the marimo plugin is an executable resolved from `.venv/bin/`, and it
+executes every code cell at build time, so it needs numpy, matplotlib, scipy and marimo present.
+The workflows failed with `Unknown plugin ".venv/bin/jupyter-book-marimo"`.
+
+It *is* fixable — `curvenote/actions/submit` is a composite action that only runs the CLI, so a
+hand-written job could `uv sync` before calling it — if automatic submission is ever wanted.
+
 ## Layout
 
 | | |

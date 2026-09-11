@@ -1260,3 +1260,41 @@ assets, written at build time.
 The chapters are generated files that are now edited by hand, so **the converter is frozen** --
 re-running it would discard every hand edit recorded in note 72 and after. It stays in the tree
 because these notes are only legible next to the code they describe.
+
+## 79. Why there is no CI
+
+The Curvenote reusable workflows failed on the first push:
+
+```
+⛔️ .venv/bin/jupyter-book-marimo Unknown plugin, it must be an executable file
+Error: ENOENT: no such file or directory, stat '.venv/bin/jupyter-book-marimo'
+```
+
+`curvenote/actions/.github/workflows/submit.yml@v1` runs inside `ghcr.io/curvenote/cli:latest`
+and its steps are checkout → (optional fonts) → `curvenote check` / `curvenote submit`. There is
+no input and no step between checkout and the CLI where project dependencies could be installed,
+and this book cannot build without them: the plugin is an executable resolved from `.venv/bin/`,
+and it executes every code cell at build time, so numpy, matplotlib, scipy and marimo all have to
+be there.
+
+Both workflows are removed; deployment is `curvenote submit curious-beams --kind article
+--collection articles` run by hand, where the venv already exists.
+
+**It is fixable if automatic submission is ever wanted.** `curvenote/actions/submit@main` is a
+*composite* action -- it only runs `curvenote submit` and assumes the CLI is on PATH -- so a
+hand-written job can install first:
+
+```yaml
+runs-on: ubuntu-latest
+steps:
+  - uses: actions/checkout@v4
+  - uses: astral-sh/setup-uv@v6
+  - run: uv sync --frozen
+  - run: npm install -g curvenote
+  - uses: curvenote/actions/submit@main
+    with: {venue: curious-beams, kind: article, collection: articles, id: ..., working-directory: .}
+```
+
+Running on a plain `ubuntu-latest` rather than their container keeps it standard; the cost is
+losing the Typst and image tooling their image carries, which this project (exporting `meca`)
+does not use. Expect several minutes a run -- the marimo plugin executes every cell in the book.
