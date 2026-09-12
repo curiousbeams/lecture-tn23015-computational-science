@@ -1357,3 +1357,41 @@ Two things follow, and they are different problems:
 
 `site.options.style` is a book-theme option. Curvenote renders with its own theme, which is why
 the file is not shipped there and both symptoms appear together despite having separate causes.
+
+## 82. The Curvenote dark-mode bug, measured
+
+Read from the deployed page while it was displaying in dark mode:
+
+```json
+{
+  "ourCss":  [],
+  "bridge":  ["https://prv.curvenote.com/.../islands-bridge-3d1a7b50....css?..."],
+  "htmlCls": "scroll-p-[100px] light",
+  "htmlData": "{}",
+  "scheme":  "dark",
+  "island":  "light"
+}
+```
+
+Two separate findings, and the second is not ours:
+
+1. **`ourCss: []`** confirms Curvenote does not ship `site.options.style` -- that is a book-theme
+   option and Curvenote renders with its own theme. The plugin's `islands-bridge.css` *is* there,
+   because the plugin ships it in the widget payload. So the editor-height cap (note 76) applies
+   locally and cannot apply on Curvenote; there is no CLI path for site styling either
+   (`curvenote site` offers only `init`).
+
+2. **`htmlCls` says `light` while `scheme` says `dark`.** The page is rendering dark, but the
+   `light` class is still on `<html>`. The bridge's `currentTheme()` walks the island's ancestors
+   and takes the first explicit class or theme attribute it finds -- `themeFromClasses` returns
+   "light" at `<html>` -- and only falls back to `getComputedStyle(host).colorScheme` when no
+   ancestor carries one. That fallback would have returned "dark" and been right.
+
+So the island is behaving exactly as documented and honouring an explicit signal that Curvenote
+has left stale. Not fixable from this repository: we cannot ship CSS there, the plugin exposes no
+theme option (`MARIMO_CONFIG_OPTION_SPECS` is eval/echo/editor/output/server-output/error/
+include/external-env/header/pyproject), and 0.0.3 is the latest release.
+
+It is worth reporting to both: Curvenote for keeping the class in step with the theme it renders,
+and jupyter-book-marimo for preferring `color-scheme` when an explicit class contradicts it.
+Locally the same page is correct, because the MyST book-theme sets the class it means.
