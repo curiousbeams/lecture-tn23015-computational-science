@@ -1298,3 +1298,62 @@ steps:
 Running on a plain `ubuntu-latest` rather than their container keeps it standard; the cost is
 losing the Typst and image tooling their image carries, which this project (exporting `meca`)
 does not use. Expect several minutes a run -- the marimo plugin executes every cell in the book.
+
+## 80. Answers leave the guard, so partial work can be checked
+
+`if given(...)` wrapped the `answer_* = ...` lines along with everything else, which meant a
+student who had filled in one blank of a three-part exercise was told all three were "not filled
+in yet". The original book checked each answer independently, and losing that was a regression,
+not a design choice.
+
+The answers now sit outside the guard. They are safe to compute on unfilled values because the
+expressions cannot raise: `np.copy(None)` is a 0-d object array, which `is_unanswered` already
+reads as unanswered, so `x.copy()` is normalised to `np.copy(x)` on the way out. 57 cells.
+
+Three conditions decide whether an answer may leave, and each was found by breaking something:
+
+* **`_unfinished` cells keep theirs.** A switch is all-or-nothing -- the cell has no per-answer
+  blank to gate on, and its scaffolding assigns real-looking values (`Pmax = -1`) that the
+  checker marked wrong the moment they escaped.
+* **Only answers built from things that are genuinely None.** ODE1 pre-allocates
+  `V = np.empty(N)`, so `np.copy(V)` outside the guard handed the checker uninitialised memory --
+  note 66's bug, straight back. An answer whose expression reads any name the cell assigns a real
+  value to at top level stays put. That is nine cells across ODE1, PDE1 and PDE2.
+* **One expression raises rather than returning a sentinel.** `calc_u(10)` fails inside the
+  function on an unfilled `uk`, so PDE2 exercise 3 keeps an inline `if given(uk) else None`.
+
+**`given()` had to change with it.** It tested `v is not None`, and an answer computed from an
+unfilled blank is `np.copy(None)` -- not None, so guards *downstream* of an answer opened on a
+0-d object array and PDE1's `visualise()` raised. It now uses `is_unanswered`, the same test the
+checker uses, so "filled in" means one thing everywhere.
+
+Verified end to end by filling in one of exercise 1.1's three blanks:
+
+```
+- `answer_3_01_1` is correct.
+- `answer_3_01_2` has not been filled in yet.
+- `answer_3_01_3` has not been filled in yet.
+```
+
+## 81. Island styling is tokens, and Curvenote does not ship our stylesheet
+
+The plugin documents a set of public CSS custom properties --
+`--marimo-island-background`, `--marimo-island-code-background`, `--marimo-island-foreground`,
+`--marimo-island-border`, `--marimo-island-radius`, `--marimo-island-margin-block` and friends --
+to be set "in the stylesheet configured by your Jupyter Book theme". Custom properties inherit
+through shadow boundaries, which is why these work where a `.cm-editor` selector cannot (note 76).
+
+Two things follow, and they are different problems:
+
+* **Height is not a token.** There is no editor-height property, so the `max-height` cap has to
+  stay as a rule on the `marimo-code-editor` host, and that needs a stylesheet.
+* **Dark mode is not ours to set.** The bridge ships `islands-bridge.css` itself -- it is in the
+  widget payload, so it reaches Curvenote -- and that file already carries a full dark palette
+  under `.marimo-island-host[data-marimo-theme=dark]`. The attribute is written by the bridge's
+  own detection, which walks the island's ancestors for a `dark`/`light` class or a theme data
+  attribute and finally falls back to `getComputedStyle(host).colorScheme`. So an island stuck in
+  light mode means that detection found nothing on the host page, *not* that a stylesheet is
+  missing -- our `custom.css` never touched colour.
+
+`site.options.style` is a book-theme option. Curvenote renders with its own theme, which is why
+the file is not shipped there and both symptoms appear together despite having separate causes.

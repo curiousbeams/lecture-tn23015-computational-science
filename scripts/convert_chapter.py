@@ -2071,13 +2071,16 @@ def given(*values):
     wrapped over six lines, burying the one thing the reader needs to see.
 
     A function argument is tested with `written`, so an exercise that asks for a function and one
-    that asks for a value read the same way at the call site.
+    that asks for a value read the same way at the call site. Everything else goes through
+    `is_unanswered`, the same test the checker uses -- "not None" is not enough, because an
+    answer built from an unfilled blank is `np.copy(None)`, a 0-d object array that is perfectly
+    not-None and would open a guard downstream of it.
 
     (A context manager would be the natural shape for "skip this block", but Python has no way to
     skip a `with` body without frame-tracing tricks, and those would be fragile inside marimo's
     own instrumented runtime. An `if` with a well-named condition costs one line and no magic.)
     """
-    return all(written(v) if callable(v) else v is not None for v in values)
+    return all(written(v) if callable(v) else not is_unanswered(v) for v in values)
 
 
 def show(*objects, **blanks):
