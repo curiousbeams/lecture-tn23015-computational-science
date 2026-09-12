@@ -1435,3 +1435,49 @@ Content fixes worth naming, as opposed to typos:
   renders well as.
 * Numerical Integration explained that integrals are hard to do analytically by saying
   "calculating the analytical form of a *derivative* is not always easy".
+
+## 84. One source of truth for the in-page runtime
+
+The eleven chapter headers carried **3,296 lines of identical machinery** -- `show`, `given`,
+`check_answers`, the print buffer -- because the header becomes a marimo setup cell running in
+the browser, where there is no filesystem and nothing to import. Changing one thing meant editing
+eleven files.
+
+Two ways out were tried and rejected:
+
+* **MyST substitutions do not reach directive options.** Tested directly: with
+  `substitutions: {checker: ...}` in `myst.yml` and `{{ checker }}` inside `header: |`, the text
+  is passed through literally and the marimo compile fails on it.
+* **Fetching the runtime at load time**, the way the data files are fetched, would remove the
+  duplication but buys it with a per-page failure mode: a data fetch that fails costs two
+  exercises, a runtime fetch that fails costs the whole page.
+
+So the copies stay, and `scripts/checker.py` becomes the source of truth with
+`scripts/sync_checker.py` writing it into all eleven headers. Pages stay self-contained; the
+duplication costs about 17 KB a page against a 4.3 MB payload, so it was never a size problem --
+it was a maintenance one.
+
+The script **refuses to write when the eleven copies disagree with each other**, since that means
+someone edited a page directly and is about to lose it. `--check` verifies without writing and
+exits non-zero, which is what to run before a release.
+
+## 85. Content fixes found by reading, not by validating
+
+None of these are things the validators can see:
+
+* **Linear Algebra 4.8 had no answer check.** `answer_6_05_4` was computed and stored but never
+  compared; the exercise it belongs to was split off from 4.6 (note 72), and `check_answers`
+  numbers its arguments from 1. It takes a `start=` now, so the second half can check `..._4`.
+* **Random Numbers 7.8 had lost half its sentence and all of its code.** The paragraph ends
+  "using the methodology developed in" -- the converter saw the `**exercise 5**` *reference* in
+  the prose as an exercise *marker* and split the exercise there, leaving an orphan with no cell
+  and putting the rest under a new label. One exercise again, and the reference is a real link.
+* **Cross-references were numbers in prose.** Twenty of them ("Exercise 3", "exercise 1(a)"),
+  written against the original book's numbering, which this edition no longer matches after the
+  exercises added in note 72. They are `[](#ex_11_03)` now, which MyST renders as "Exercise 8.3"
+  and keeps correct by itself.
+* Four FT1 stubs put the commented `_ax.plot(...)` hint *above* the `plt.subplots()` that creates
+  the axes; fourteen lines of fill-in-the-blank scaffolding were still sitting in solutions;
+  FT1 5.1's solution reported only array shapes, and now prints what it built.
+* A dangling "(see wikipedia page if you are interested)" in Numerical Differentiation pointed at
+  nothing -- there was no link in the original either. Dropped rather than aimed at a guess.

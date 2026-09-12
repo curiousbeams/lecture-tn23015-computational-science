@@ -2144,20 +2144,23 @@ def is_unanswered(value):
     return arr.dtype == object
 
 
-def check_answers(*values, key):
+def check_answers(*values, key, start=1):
     """Compare the student's answers against the stored reference values.
 
     Returns an mo.callout so the result renders in the cell, green/red/amber, in the style of
     mograder's student-facing check().
+
+    `start` is the index of the first answer, for the few exercises that were split in two and
+    whose second half owns `..._4` onwards rather than `..._1`.
     """
     report, ok = [], True
-    blanks = [f"{key}_{i}" for i, v in enumerate(values, start=1) if is_unanswered(v)]
+    blanks = [f"{key}_{i}" for i, v in enumerate(values, start=start) if is_unanswered(v)]
     if len(blanks) == len(values):
         return mo.callout(
             mo.md("Waiting for your code: replace the `None` placeholders above."),
             kind="warn",
         )
-    for i, value in enumerate(values, start=1):
+    for i, value in enumerate(values, start=start):
         name = f"{key}_{i}"
         if is_unanswered(value):
             ok = False
