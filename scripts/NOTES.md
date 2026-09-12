@@ -1395,3 +1395,43 @@ include/external-env/header/pyproject), and 0.0.3 is the latest release.
 It is worth reporting to both: Curvenote for keeping the class in step with the theme it renders,
 and jupyter-book-marimo for preferring `color-scheme` when an explicit class contradicts it.
 Locally the same page is correct, because the MyST book-theme sets the class it means.
+
+## 83. House style, set by hand on chapter 1 and applied to the rest
+
+The conventions come from Georgios's pass over `01.numerical-differentiation.md`; the rest of
+the book was brought into line with them.
+
+* **One sentence per line.** Keeps prose diffs readable. Split conservatively: a break needs a
+  following capital, and is suppressed after an abbreviation (`ie.`, `vs.`), a bare number
+  (`4.4`), a single initial, or a closing `$...$`, so inline maths survives intact.
+* **A cell with nothing to fill in is not an exercise**: `:editor: false` + `:echo: true`, ending
+  in a bare `_ax` / `_fig` rather than `show(...)` -- with no editor there is no run button to
+  keep alive, and note 43 does not apply. Solutions keep `show(...)`.
+* **`# Do not edit the boiler-plate code below.`** sits above the machinery in every editable
+  exercise: 107 cells, every `:editor: true` cell in the book.
+
+Two rules were wrong on the first attempt, and both were caught by listing the affected cells
+rather than trusting the pattern:
+
+* The boiler-plate comment is placed from the AST, not by matching line prefixes. A guard's
+  *body* is indented, so a prefix scan stopped at the first `print(...)` inside it and put the
+  comment in the middle of the block it introduces.
+* "Has a blank" is the wrong test for "is an exercise". FT1 exercise 2 hints only with
+  `# _ax.plot(_____,____)` and the boolean-indexing exercise in Random Numbers gives no hint at
+  all; both were about to lose their editors. Membership of an `{exercise}` decides it, with the
+  blank-pattern as a fallback for the few stub cells that sit outside one.
+
+Content fixes worth naming, as opposed to typos:
+
+* **Attribution.** Partial Differential Equations I said "chapter 5 of my PhD thesis" and "which
+  I studied in my PhD". The thesis is Gary Steele's and this edition is authored by someone else,
+  so the first person there misattributes; both now name him. The first person elsewhere is
+  plural, matching chapter 1.
+* **A stale platform reference.** Numerical Integration told the reader to load
+  `resource/asnlib/public/velocities.dat` "included already on your notebook server". There is no
+  notebook server; the file is fetched by `load_data` (note 77).
+* **Bare link lines.** Nineteen paragraphs ended in a colon followed by a lone
+  `[](wiki:...)` or documentation link. Folded into the sentence, which is what the `wiki:` role
+  renders well as.
+* Numerical Integration explained that integrals are hard to do analytically by saying
+  "calculating the analytical form of a *derivative* is not always easy".
