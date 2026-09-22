@@ -5,3 +5,8 @@ node_modules/
 .venv/
 __pycache__/
 .jupyter-book-marimo/
+
+# generated before `curvenote submit` by scripts/build_lite.sh, not committed (21 MB)
+lite/
+_lite_src/
+.jupyterlite.doit.db

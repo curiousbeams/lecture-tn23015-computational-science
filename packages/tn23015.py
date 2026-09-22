@@ -1,0 +1,351 @@
+"""The TN23015 runtime: everything an exercise calls that is not numpy.
+
+One file, two homes. Under marimo it renders through `mo.*`; in a Jupyter notebook it renders
+through `IPython.display`; with neither it falls back to plain text, which is what makes it
+testable from a script. That is the whole job of the four `_md` / `_callout` / `_stack` / `_fold`
+helpers below -- everything under them is environment-agnostic.
+
+In a notebook, drop this file next to the notebooks and `import tn23015`. Under marimo there is
+no filesystem to import from, so `scripts/sync_checker.py` copies this file's body into each
+chapter's `{marimo-config}` header instead. Same source either way.
+
+`ANSWERS` is loaded from `answers/*.json` beside this file when they are there (the notebook
+case); the marimo header defines it above this block instead (the site case).
+"""
+
+import numpy as np                      # the marimo header imports this above the copied body,
+                                        # but as an imported module we need it ourselves
+
+try:                                    # marimo, when the page is a marimo island
+    import marimo as mo
+except ImportError:                     # pragma: no cover - exercised in notebooks
+    mo = None
+
+try:                                    # IPython, when this is a notebook
+    from IPython.display import Markdown as _Markdown, display as _display
+except ImportError:                     # pragma: no cover - exercised from scripts
+    _Markdown = _display = None
+
+# A callout has no IPython equivalent, so it becomes a blockquote. The body already opens with
+# its own heading ("**Correct.**"), so nothing is added here -- an earlier version prefixed the
+# kind and every verdict came out saying it twice.
+
+
+def _md(text):
+    if mo is not None:
+        return mo.md(text)
+    if _Markdown is not None:
+        return _Markdown(text)
+    return text
+
+
+def _callout(body, kind):
+    if mo is not None:
+        return mo.callout(body, kind=kind)
+    text = body.data if hasattr(body, "data") else str(body)
+    return _md("\n".join("> " + ln if ln else ">" for ln in text.split("\n")))
+
+
+def _stack(items):
+    if mo is not None:
+        return mo.vstack(items)
+    if _display is not None:
+        for item in items:
+            _display(item)
+        return None
+    return items
+
+
+def _fold(label, body):
+    if mo is not None:
+        return mo.accordion({label: body})
+    return body                          # notebooks show it all; there is nothing to fold into
+
+
+def _load_answers():
+    """The answer bank, from `answers/*.json` beside this file. Empty under marimo, which
+    defines ANSWERS in the page header above this block."""
+    import json
+    from pathlib import Path
+
+    roots = []
+    if "__file__" in globals():
+        roots.append(Path(__file__).parent / "answers")
+    roots.append(Path.cwd() / "answers")
+    bank = {}
+    for root in roots:
+        if root.is_dir():
+            for path in sorted(root.glob("*.json")):
+                bank.update(json.loads(path.read_text()))
+            break
+    return bank
+
+
+ANSWERS = _load_answers()
+
+def reference_answer(key):
+    """Return (expected, comparator) for a stored answer, handling downsampled entries."""
+    raw = ANSWERS[key]
+    if isinstance(raw, dict) and raw.get("__downsampled__"):
+        stride = raw["stride"]
+        shape = tuple(raw["shape"])
+        vals = raw["values"]
+        sol = to_array(vals)
+        return sol, shape, stride
+    sol = to_array(raw)
+    return sol, sol.shape, 1
+
+
+def to_array(v):
+    if isinstance(v, dict) and "real" in v:
+        return np.array(v["real"]) + 1j * np.array(v["imag"])
+    return np.array(v)
+
+
+def diff_report(sol, ans, atol):
+    lines, n = [], 0
+    sol, ans = np.atleast_1d(sol), np.atleast_1d(ans)
+    for idx in np.ndindex(sol.shape):
+        if not np.isclose(sol[idx], ans[idx], atol=atol):
+            lines.append(f"  {idx}  expected {sol[idx]:.6g}   yours {ans[idx]:.6g}")
+            n += 1
+            if n >= 10:
+                lines.append("  ... (only the first 10 shown)")
+                break
+    return "\n".join(lines)
+
+
+def describe(value):
+    """One-line description of a value the student has produced."""
+    arr = np.asarray(value)
+    if arr.dtype == object:
+        return "set"
+    if arr.ndim == 0:
+        return f"= {arr.item():.6g}" if np.issubdtype(arr.dtype, np.number) else "set"
+    return f"shape {arr.shape}"
+
+
+# There is no filesystem in the browser, so the two data files the book uses are fetched over
+# the network. They are served from this repository's own `data/` directory rather than from the
+# original book's, so the port depends on nothing outside itself -- which is why the repository
+# is public: raw.githubusercontent.com does not serve a private repo without a token.
+DATA_URL = (
+    "https://raw.githubusercontent.com/curiousbeams/"
+    "lecture-tn23015-computational-science/main/data/"
+)
+
+
+def load_data(name, **kwargs):
+    """np.loadtxt for a data file, working both in the browser and at build time."""
+    try:
+        from pyodide.http import open_url  # only exists under Pyodide
+    except ImportError:
+        return np.loadtxt("data/" + name, **kwargs)  # build time: the local copy
+    return np.loadtxt(open_url(DATA_URL + name), **kwargs)
+
+
+PRINTED = []
+
+
+def print(*args, **kwargs):
+    """`print` that shows up in the cell, not the browser console.
+
+    marimo's islands do not surface stdout: a top-level `print` in a student's cell went to the
+    developer console, where no student will look. Rather than teach a different function, the
+    builtin is shadowed to buffer its output; `preview()` and `show()` drain the buffer and
+    render it with whatever else the cell displays.
+    """
+    import builtins
+    import io
+
+    kwargs.pop("file", None)
+    buffer = io.StringIO()
+    builtins.print(*args, file=buffer, **kwargs)
+    PRINTED.append(buffer.getvalue())
+
+
+def drain_printed():
+    """Everything the cell printed, with carriage returns applied as a terminal would.
+
+    `print("N_iter %d\r" % n, end="")` is a progress line: in a terminal each update overwrites
+    the last, and the reader sees one line counting up. Concatenated into a buffer instead, PDE1's
+    relaxation solution produced 65 KB of text in three newlines and 1909 carriage returns -- one
+    unreadable line, and the single worst piece of output in the book. Keeping only what follows
+    the last `\r` of each line is what the author wrote the `\r` to mean.
+    """
+    text = "".join(PRINTED)
+    PRINTED.clear()
+    return "\n".join(last_write(line) for line in text.split("\n"))
+
+
+def last_write(line):
+    # The final segment is usually empty -- the progress line ends with a carriage return and the
+    # summary that follows begins with a newline -- so it is the last *non-empty* write that the
+    # reader would have been left looking at.
+    written = [seg for seg in line.split("\r") if seg]
+    return written[-1] if written else ""
+
+
+# Long output is folded away rather than dumped: a solution that prints a row per iteration
+# should not push the next exercise off the screen.
+PRINT_HEAD, PRINT_TAIL = 12, 4
+
+
+def format_printed(text):
+    text = text.rstrip()
+    lines = text.split("\n")
+    if len(lines) <= PRINT_HEAD + PRINT_TAIL + 1:
+        return _md(f"```text\n{text}\n```")
+    hidden = len(lines) - PRINT_HEAD - PRINT_TAIL
+    shown = [*lines[:PRINT_HEAD], f"... {hidden} more lines ...", *lines[-PRINT_TAIL:]]
+    return _stack([
+        _md("```text\n" + "\n".join(shown) + "\n```"),
+        _fold(f"Show all {len(lines)} lines", _md(f"```text\n{text}\n```")),
+    ])
+
+
+def unwritten_stub(_x):
+    return None
+
+
+def written(fn):
+    """True once a placeholder function has been given a real body.
+
+    Some exercises ask for a function rather than a value: the stub is `def f(x): return None`,
+    so `f(x)` gives None and whatever is built from it -- a plot, an index, a mean -- fails.
+    There is no variable to test here, because the blank *is* the return value and that only
+    exists once the function is called. So the body is what gets tested, by comparing its
+    bytecode against the placeholder above. Parameter names and count do not affect it; any
+    real body does.
+    """
+    code = getattr(fn, "__code__", None)
+    return code is None or code.co_code != unwritten_stub.__code__.co_code
+
+
+def given(*values):
+    """True once every blank a cell is waiting on has been filled in.
+
+    This is the whole condition of the guard that fronts an unfinished exercise. Spelled out it
+    was a wall -- `if a is not None and b is not None and c is not None and ...`, five deep and
+    wrapped over six lines, burying the one thing the reader needs to see.
+
+    A function argument is tested with `written`, so an exercise that asks for a function and one
+    that asks for a value read the same way at the call site. Everything else goes through
+    `is_unanswered`, the same test the checker uses -- "not None" is not enough, because an
+    answer built from an unfilled blank is `np.copy(None)`, a 0-d object array that is perfectly
+    not-None and would open a guard downstream of it.
+
+    (A context manager would be the natural shape for "skip this block", but Python has no way to
+    skip a `with` body without frame-tracing tricks, and those would be fragile inside marimo's
+    own instrumented runtime. An `if` with a well-named condition costs one line and no magic.)
+    """
+    return all(written(v) if callable(v) else not is_unanswered(v) for v in values)
+
+
+def show(*objects, **blanks):
+    """The last line of every cell -- stub or solution, figure, print or UI element.
+
+    One entry point rather than three (`preview`, `printed`, `show`), because a reader should not
+    have to work out which applies. It renders, in order:
+
+    * anything the cell printed (see `print` above);
+    * any figure, axes or UI element passed positionally;
+    * a summary of the values the cell defined, when there is nothing else to show.
+
+    A marimo island with no output has no play button -- and with no play button the cell can
+    never be run, so a cell that displays nothing is inert. That is why this is never optional.
+
+    `blanks` are passed by keyword so the prompt can name them. While any is still None the cell
+    is unfinished, and says which name it is waiting for -- it may well belong to an earlier
+    exercise, in which case there is nothing to fill in *here* and a generic "fill this in"
+    would send the reader looking in the wrong place. Anything already printed is shown
+    regardless, since printing intermediate values is how a student works towards an answer.
+    """
+    displays = list(objects)
+    missing = [k for k, v in blanks.items() if not given(v)]
+
+    text = drain_printed()
+    blocks = []
+    if text.strip():
+        blocks.append(format_printed(text))
+    blocks.extend(d for d in displays if d is not None)
+
+    if missing:
+        names = ", ".join(f"`{m}`" for m in missing)
+        blocks.append(_md(f"*Waiting for {names}.*"))
+    elif not blocks and blanks:
+        blocks.append(
+            _md(" · ".join(f"`{k}` {describe(v)}" for k, v in blanks.items()))
+        )
+    if not blocks:
+        # Never None. A cell whose output is None has no play button, so it cannot be run --
+        # not now, and not after the reader fills it in either.
+        blocks.append(_md("*Nothing to display yet.*"))
+    return blocks[0] if len(blocks) == 1 else _stack(blocks)
+
+
+def is_unanswered(value):
+    """True while an answer is still built out of unfilled placeholders.
+
+    Identity alone is not enough: `answer_3_02_1 = (yd_forward, error_forward)` is a *tuple* of
+    sentinels, and `answer_7_06_1 = np.copy(y)` on an unfilled `y` is a 0-d object array. Both
+    have to read as unanswered, or the checker marks work wrong before it has been attempted.
+
+    With `None` as the sentinel this is decidable. Under the old 2x2-NaN one it was not: the test
+    had to be "entirely NaN", which cannot tell a sentinel from a real result that legitimately
+    came out all-NaN.
+    """
+    if value is None:
+        return True
+    if isinstance(value, (tuple, list)):
+        return any(is_unanswered(v) for v in value)
+    arr = np.asarray(value)
+    return arr.dtype == object
+
+
+def check_answers(*values, key, start=1):
+    """Compare the student's answers against the stored reference values.
+
+    Returns an mo.callout so the result renders in the cell, green/red/amber, in the style of
+    mograder's student-facing check().
+
+    `start` is the index of the first answer, for the few exercises that were split in two and
+    whose second half owns `..._4` onwards rather than `..._1`.
+    """
+    report, ok = [], True
+    blanks = [f"{key}_{i}" for i, v in enumerate(values, start=start) if is_unanswered(v)]
+    if len(blanks) == len(values):
+        return _callout(_md("Waiting for your code: replace the `None` placeholders above."),
+            "warn")
+    for i, value in enumerate(values, start=start):
+        name = f"{key}_{i}"
+        if is_unanswered(value):
+            ok = False
+            report.append(f"`{name}` has not been filled in yet.")
+            continue
+        if name not in ANSWERS:
+            report.append(f"`{name}` has no stored answer, skipping.")
+            continue
+        sol, shape, stride = reference_answer(name)
+        ans = np.asarray(value)
+        if ans.shape != shape:
+            ok = False
+            report.append(f"`{name}` has the wrong shape: expected `{shape}`, got `{ans.shape}`.")
+            continue
+        if stride > 1:
+            ans = ans[tuple(slice(None, None, stride) for _ in range(ans.ndim))]
+        finite = sol[np.isfinite(sol)] if sol.size else sol
+        atol = 1e-3 * np.max(np.abs(finite)) if finite.size else 1e-8
+        atol = float(atol) or 1e-8
+        if np.allclose(ans, sol, atol=atol, equal_nan=True):
+            report.append(f"`{name}` is correct.")
+        else:
+            ok = False
+            report.append(
+                f"`{name}` has the right shape but incorrect values:\n\n"
+                f"```\n{diff_report(sol, ans, atol)}\n```"
+            )
+    body = "\n\n".join(f"- {line}" if "\n" not in line else line for line in report)
+    if ok:
+        return _callout(_md(f"**Correct.**\n\n{body}"), "success")
+    return _callout(_md(f"**Not quite yet.**\n\n{body}"), "danger")

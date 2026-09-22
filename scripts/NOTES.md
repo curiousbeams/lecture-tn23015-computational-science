@@ -1481,3 +1481,62 @@ None of these are things the validators can see:
   FT1 5.1's solution reported only array shapes, and now prints what it built.
 * A dangling "(see wikipedia page if you are interested)" in Numerical Differentiation pointed at
   nothing -- there was no link in the original either. Dropped rather than aimed at a guess.
+
+## 86. JupyterLite: where it can and cannot be served
+
+The book now offers a JupyterLab route for students who want one. Everything below was measured,
+not assumed, and most of it corrects an earlier guess.
+
+**Curvenote does upload `static_files`** -- all 566 files. It serves them two ways:
+
+```
+200   pub.curvenote.com/<uuid>/public/lite/lab/index.html      (unsigned)
+403   prv.curvenote.com/<uuid>/public/lite/lab/index.html      (needs a signature)
+200   prv.curvenote.com/<uuid>/public/lite/...?URLPrefix=...&Signature=...
+```
+
+An earlier conclusion that Curvenote "does not serve static assets" was wrong on both counts: it
+serves them, and `custom.css` is deployed too (which means **notes 81 and 82 are wrong where they
+say otherwise** -- the dark-mode fault is only the stale `light` class on `<html>`).
+
+**Signed URLs cannot host JupyterLite.** It fetches several hundred of its own assets
+*relatively* (`../build/lab/bundle.js`), and those requests carry no query string, so everything
+after the entry point 403s. There is no signed cookie either -- the article page sets none.
+
+**A custom article slug routes pages only.** `/articles/<slug>/smoke` is 200 while
+`/articles/<slug>/public/lite/...` is 404; assets stay on the UUID path. The UUID is fixed for
+this project, so the public URL is safe to hardcode.
+
+**JupyterLite 0.8.4 has no `fromURL`**, and its config anchors contents to the deployment --
+`contentsAllJsonFile` is "relative to `api/contents/{dir}/` ... served from `files/`". So the
+notebooks have to live inside the bundle, which settles it as **one bundle per site** rather than
+one shared instance fed per-site contents. Per-chapter links then differ only by `?path=`.
+
+**Building it** (`scripts/build_lite.sh`) has two traps worth keeping: `jupyter lite build
+--contents` fails without `jupyter-server` installed, and 48 MB of the 69 MB a default build
+produces is JupyterLab's own source maps. Stripped, it is 22 MB unpacked and 6.4 MB zipped.
+
+## 87. One runtime for both environments
+
+`packages/tn23015.py` is `scripts/checker.py` with its 13 marimo call sites routed through four
+helpers -- `_md`, `_callout`, `_stack`, `_fold` -- which pick marimo, `IPython.display`, or plain
+text at import. Notebooks `import tn23015` from beside themselves; the site cannot import
+anything, so `sync_checker.py` keeps copying the body into each chapter header.
+
+Two things it needed that the marimo copy never did: its own `import numpy`, and its own answer
+loading. The page header had been supplying both. One bug worth remembering: the notebook callout
+prefixed the verdict word, and every result read "**Correct.** > **Correct.**" -- the body already
+carries its own heading.
+
+## 88. The reader-facing checks are now a script
+
+Three checks had been rebuilt from memory in scratch files, session after session.
+`scripts/check_book.py` makes them permanent, because every one of them caught something no other
+check would have:
+
+* `runs` -- every cell executes, including the stub failures `validate_page.py` forgives
+* `checks` -- no answer check renders a verdict before the reader types. Only amber is correct;
+  green or red means the exercise is grading its own scaffolding (note 66, note 68)
+* `outputs` -- no solution displays nothing (note 70)
+
+It exits non-zero, so it can gate a deploy.
