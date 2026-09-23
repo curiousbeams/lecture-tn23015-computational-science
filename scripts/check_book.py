@@ -116,20 +116,34 @@ def check_checks(verbose: bool) -> int:
 
 
 def check_outputs(verbose: bool) -> int:
-    bad = 0
-    for name in CHAPTERS:
-        for idx, kind, src, _, _ in sweep(V.ROOT / name):
-            if kind != "solution":
+    """No solution renders an empty cell.
+
+    Solutions are executable *because* their output is the teaching. They used to live in the
+    chapters and were swept from there; `strip_solutions.py` took them off the website, so this
+    reads the ground-truth notebooks instead -- same cells, same rule, and the coverage does not
+    quietly go to zero just because the markdown no longer has them.
+    """
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from sync_cells import notebook_cells
+
+    notebooks = sorted((V.ROOT / "marimo-notebooks").glob("[01][0-9].*.py"))
+    if not notebooks:
+        print("outputs: no marimo-notebooks/ -- nothing to check")
+        return 0
+    bad = seen = 0
+    for nb in notebooks:
+        for name, src in notebook_cells(nb).items():
+            if not name.startswith("sol_"):
                 continue
-            displays = bool(re.search(r"^show\([^)]", src, re.M))
-            prints = "print(" in src
-            if displays or prints:
+            seen += 1
+            if re.search(r"^show\([^)]", src, re.M) or "print(" in src:
                 continue
             bad += 1
-            print(f"  {name} cell {idx}: solution displays nothing ({len(src.splitlines())} lines)")
+            print(f"  {nb.name} {name}: displays nothing ({len(src.splitlines())} lines)")
             if verbose:
                 print("      " + src.strip()[:110])
-    print(f"outputs: {bad} solutions that display nothing")
+    print(f"outputs: {bad} of {seen} solutions display nothing")
     return bad
 
 

@@ -18,8 +18,9 @@ side gained or lost one, and would do it silently.
 
 Cells whose name the markdown does not have are reported rather than inserted. Where a new
 exercise belongs in the prose is an editorial decision, and guessing it would be worse than
-saying so. `head_*` cells have no block in the markdown by design: the page renders the question
-from its own prose, and the notebook gets a copy of it.
+saying so. Two prefixes have no block by design: `head_*`, because the page renders the question
+from its own prose, and `sol_*`, because `strip_solutions.py` took the solutions off the website
+and `make_solutions.py` generates them into `solutions/` instead.
 
 Running it is idempotent: the extractor indents each body to sit inside its `def`, and this
 undoes exactly that, so a notebook extracted and synced back leaves `git diff` empty.
@@ -159,7 +160,9 @@ def rewrite(path: Path, bodies: dict[str, str]) -> tuple[str, list[str]]:
         out.extend(bodies[name].split("\n") if name in bodies else lines[start:i - trail])
         out.extend([""] * trail)
     placed = set(names)
-    unplaced = [k for k in bodies if k not in placed and not k.startswith("head_")]
+    # `head_*` is notebook-only navigation and `sol_*` was deliberately taken off the website by
+    # `strip_solutions.py`; neither has a block here, and neither is a problem.
+    unplaced = [k for k in bodies if k not in placed and not k.startswith(("head_", "sol_"))]
     return "\n".join(out), unplaced
 
 

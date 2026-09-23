@@ -1872,3 +1872,89 @@ or carries a stale URL.
 `myst.yml` gained `static_files: [jupyter-lite, marimo-apps]`; both are gitignored, so a deploy
 means building them first -- confirmed to land in `_build/site/public/` unhashed, 1415 files
 between them.
+
+## 100. Deploying the bundles: four wrong diagnoses before the right one
+
+The badges 404ed for a week of elapsed time across four causes, and it is worth recording which
+evidence distinguished them, because three of the four looked conclusive at the time.
+
+**The cdnKey changes with every submission.** Curvenote serves `static_files` from
+`pub.curvenote.com/<cdnKey>/public/`, and `job.results.cdnKey` in `_build/logs/curvenote.submit.json`
+is new each time. The work id (`01a091ce-…`) is stable but nothing is served under it. Old keys
+keep serving, so a hardcoded one keeps working while pointing at a frozen snapshot.
+`add_launch_badges.py` now reads the key from the submit log, which means the order is submit, run
+the script, submit again.
+
+**There are no directory indexes.** `pub.curvenote.com` is object storage: `.../lab/` is
+`NoSuchKey`, `.../lab/index.html` is 200. Every badge URL ends in an explicit file.
+
+**A nested `public/` was blamed and was innocent.** Every file under `marimo-apps/public/` 404ed
+while `marimo-apps/assets/…` and `jupyter-lite/files/answers/…` were fine, which read as Curvenote
+dropping a directory whose name collides with its own `/public/` prefix. Renaming it to `runtime/`
+was wrong, and reverted. The tell was never checked: how much of `assets/` was *also* missing. A
+130-file sample would have shown it immediately -- 43 missing, contiguous from `dist-…`.
+
+**It was a truncated upload, made permanent by deduplication.** The real shape, from a full sweep
+of all 1415 files:
+
+    jupyter-lite/**          ~560 files     2 missing
+    marimo-apps/<chapter>/    121 files     0 missing
+    marimo-apps/assets        728 files   446 missing
+    marimo-apps/public         14 files    14 missing
+
+and inside `assets/` a single cut: complete through `dist-CYcHr3tv.js`, absent from
+`dist-CeF1Em5L.js` onward. One transfer stopping mid-directory. Worse, the *next* submission
+reported "49/1512 files need to be uploaded" -- staging deduplicates against what it believes is
+stored, so the interrupted files were never retried. A submission reports success while shipping a
+bundle that is 40% missing. Curvenote cleared their cache; it truncated again at the same place.
+
+`scripts/check_deploy.py` exists because of this: a green submit is not evidence, so it asks the
+CDN. It samples in sort order, since a truncation is contiguous, and `--all` gives the extent.
+
+## 101. Slimming the marimo assets, and what that cost
+
+To get under whatever ceiling is being hit, `scripts/trace_marimo_assets.py` runs every chapter in
+headless chromium and records what the browser actually requests: **369 of 728 assets, 28 MB to
+13 MB**, both bundles together 1415 files to 1056. Dropped: Observable Plot (4.7 MB), a SQL parser
+(2.5 MB), react-vega, cytoscape, a terminal, two dozen CodeMirror grammars, every Mermaid diagram.
+
+Measured, not guessed -- but with a hole that has to be stated. Headless chromium boots the page,
+pulls Pyodide from jsdelivr and installs numpy/matplotlib/scipy through micropip, all captured;
+it never gets as far as *executing* the cells (seven minutes, no output, no `<img>`), and it cannot
+click panels that only exist once the kernel is up. So the list is a lower bound, and a real
+browser confirmed the shape of what it misses: editing, running and grading work; the side panels
+and app-view slides do not. Those are developer tools, and restoring them means restoring their
+dependency closures, which is the weight being shed. Recorded in `build_marimo_apps.sh` as a
+deliberate trade rather than an accident.
+
+## 102. Solutions off the website
+
+`strip_solutions.py` removed 87 `:::{solution-start} … :::{solution-end}` regions from the eleven
+chapters -- 88 cells, since one FT2 region held two -- and `make_solutions.py` generates
+`solutions/NN.<slug>.py` and `.ipynb` from the ground truth instead. All 88 run standalone in both
+formats with zero errors.
+
+**Solutions are not self-contained, and the measurement is worth keeping.** Comparing free
+variables against what each cell binds -- rather than counting every shared name, which says they
+read hundreds of things and is just shadowing -- the whole set reaches outside itself exactly
+three times, all into `demo_*` cells: `s = np.fft.fftshift` (FT1), the `X`/`Y` meshgrid (FT2), and
+`my_dst`/`my_idst` (PDE2). Nothing is read from an `ex_*` cell, because every solution works in
+its own `_solN` names.
+
+So a solutions notebook carries the setup block, the headings and *some* demonstrations. Not all:
+most demonstrations exist to display what the reader produced (`if given(phi):` and a plot), and
+without the stubs they are a NameError -- four chapters failed on exactly that. They are dropped.
+FT1's is both at once, defining `s` and then plotting the reader's `f` and `yt` behind a guard, so
+it is kept with those names bound to None: the guard stays closed and the helper still lands.
+
+Three things had to follow the removal, or coverage would have quietly gone to zero:
+
+* `sync_cells.py` no longer reports `sol_*` as "no block in the markdown" -- that is now by design,
+  alongside `head_*`.
+* `check_book.py`'s `outputs` check reads the ground-truth notebooks instead of sweeping the
+  chapters. It still says `0 of 88`, rather than `0` of nothing.
+* `solutions/` is gitignored, being generated.
+
+**What this does not do.** The repository is public and `marimo-notebooks/*.py` carries every
+`sol_*` cell in plain sight -- not merely in history, in HEAD. This takes the solutions off the
+student's *path*; it does not make them secret, and nobody should tell the TAs otherwise.
