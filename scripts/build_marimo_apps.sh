@@ -51,7 +51,10 @@ for nb in "$STAGE"/[01][0-9].*.py; do
       || { echo "assets differ for $slug -- the shared copy is not safe"; exit 1; }
     rm -rf "$OUT/$slug/assets"
   fi
-  sed -i '' 's|"\./assets/|"../assets/|g' "$OUT/$slug/index.html"
+  # not `sed -i` -- BSD wants an argument to it and GNU refuses one, and this has to run on
+  # whatever machine is reproducing a deploy
+  sed 's|"\./assets/|"../assets/|g' "$OUT/$slug/index.html" > "$OUT/$slug/index.html.tmp"
+  mv "$OUT/$slug/index.html.tmp" "$OUT/$slug/index.html"
 
   for whl in "$OUT/$slug"/public/wheels/*.whl; do
     dest="$OUT/public/wheels/$(basename "$whl")"
@@ -84,13 +87,16 @@ rm -rf "$STAGE"
 # terminal wants xterm, the dependency graph wants cytoscape at 428 KB -- which is the weight this
 # is trying to shed. If they are ever wanted, add the ~25 `*-panel-*` chunks *and* whatever they
 # import, or re-trace with the panels open.
-KEEP=scripts/marimo_assets_used.txt
+KEEP="$PWD/scripts/marimo_assets_used.txt"
 if [ -f "$KEEP" ]; then
   before=$(ls "$OUT/assets" | wc -l | tr -d ' ')
-  ( cd "$OUT/assets" && ls > /tmp/.marimo_have.txt \
-    && comm -23 <(sort /tmp/.marimo_have.txt) <(sort "$OLDPWD/$KEEP") | while read -r f; do
-         rm -f -- "$f"
-       done )
+  keep_sorted=$(mktemp); have_sorted=$(mktemp)
+  sort "$KEEP" > "$keep_sorted"
+  ls "$OUT/assets" | sort > "$have_sorted"
+  comm -23 "$have_sorted" "$keep_sorted" | while IFS= read -r f; do
+    rm -f -- "$OUT/assets/$f"
+  done
+  rm -f "$keep_sorted" "$have_sorted"
   echo "  assets: $before -> $(ls "$OUT/assets" | wc -l | tr -d ' ') files (unused chunks dropped)"
 else
   echo "  $KEEP missing -- keeping all assets; run scripts/trace_marimo_assets.py to slim them"

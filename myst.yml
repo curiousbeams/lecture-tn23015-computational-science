@@ -23,6 +23,7 @@ project:
     - format: meca
   exclude:
     - README.md
+    - REPRODUCING-THE-UPLOAD-BUG.md   # for Curvenote, not book content
     - scripts/**   # porting notes and converter sources, not book content
   # What the "launch lite" and "open in marimo" badges point at. Both are generated and
   # gitignored, so build them before `curvenote submit`:
