@@ -21,6 +21,12 @@
 # marimo builds the `tn23015` wheel itself from the local module the notebooks import. It does not
 # follow symlinks, which is why `marimo-notebooks/tn23015.py` is a real file.
 #
+# If files under `public/` go missing after a deploy while everything else is there, suspect a
+# **truncated upload** before suspecting the layout: `public` sorts after `assets` and after the
+# numbered chapter directories, so it is the tail of the walk and the first casualty of an
+# interrupted transfer. That signature was once misread here as Curvenote dropping the directory
+# for its name; it was not, and renaming it away from marimo's own convention bought nothing.
+#
 # Solutions are absent, not hidden: the notebook source sits in `index.html` in plain view.
 set -euo pipefail
 cd "$(dirname "$0")/.."

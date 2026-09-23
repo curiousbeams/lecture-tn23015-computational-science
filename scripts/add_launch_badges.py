@@ -21,9 +21,33 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-# Where the two bundles are served from. `scripts/build_jupyter_lite.sh` and `scripts/build_marimo_apps.sh`
-# produce `jupyter-lite/` and `marimo-apps/`; both are gitignored and have to be built before a deploy.
-BASE = "https://pub.curvenote.com/01a0c9a4-6035-7805-b31e-890427f99eee/public"
+# Curvenote serves `static_files` from `pub.curvenote.com/<cdnKey>/public/`, and **the cdnKey is
+# different for every submission** -- which is why a hardcoded one was wrong twice over: it was a
+# stale key, and it would have gone stale again at the next deploy. It is not the work id either
+# (that is stable, but nothing is served under it).
+#
+# The key of the last submission is in the build log, so that is where this reads it from:
+#
+#     _build/logs/curvenote.submit.json  ->  job.results.cdnKey
+#
+# Old keys keep serving (measured: a submission from the day before is still 200), so once the
+# badges point at a deploy that contains the bundles they keep working. The order is therefore:
+# submit, run this, submit again -- and after that only when the notebooks themselves change.
+#
+# Every link ends in an explicit file. `pub.curvenote.com` is object storage -- it has no
+# directory indexes, so `.../lab/` is a 404 (`NoSuchKey`) while `.../lab/index.html` is a 200.
+CDN = "https://pub.curvenote.com"
+SUBMIT_LOG = ROOT / "_build" / "logs" / "curvenote.submit.json"
+
+
+def cdn_key(argv: list[str]) -> str:
+    """The cdnKey to point the badges at: `--key <uuid>`, else the last submission's."""
+    if "--key" in argv:
+        return argv[argv.index("--key") + 1]
+    if not SUBMIT_LOG.exists():
+        raise SystemExit(f"no {SUBMIT_LOG.relative_to(ROOT)}; submit once, or pass --key <uuid>")
+    import json
+    return json.loads(SUBMIT_LOG.read_text())["job"]["results"]["cdnKey"]
 
 TITLE = ":::{admonition} Rather work in a notebook?"
 LITE_BADGE = "https://jupyterlite.rtfd.io/en/stable/_static/badge-launch.svg"
@@ -31,7 +55,7 @@ MARIMO_BADGE = "https://marimo.io/shield.svg"
 ANCHOR = ":::{admonition} Learning goals"
 
 
-def block(slug: str) -> str:
+def block(slug: str, base: str) -> str:
     return "\n".join([
         TITLE,
         ":class: seealso",
@@ -39,16 +63,16 @@ def block(slug: str) -> str:
         "The same exercises, without the surrounding explanation, running in your browser.",
         "Nothing to install — and nothing is saved, so download your work before you close the tab.",
         "",
-        f"[![launch lite]({LITE_BADGE})]({BASE}/jupyter-lite/lab/index.html?path={slug}.ipynb)",
-        f"[![open in marimo]({MARIMO_BADGE})]({BASE}/marimo-apps/{slug}/)",
+        f"[![launch lite]({LITE_BADGE})]({base}/jupyter-lite/lab/index.html?path={slug}.ipynb)",
+        f"[![open in marimo]({MARIMO_BADGE})]({base}/marimo-apps/{slug}/index.html)",
         ":::",
     ])
 
 
-def apply(path: Path) -> tuple[str, bool]:
+def apply(path: Path, base: str) -> tuple[str, bool]:
     """(new text, changed). Replaces an existing block, or inserts one after the learning goals."""
     text = path.read_text(encoding="utf-8")
-    want = block(path.stem)
+    want = block(path.stem, base)
     if TITLE in text:
         start = text.index(TITLE)
         end = text.index("\n:::", text.index("\n", start)) + len("\n:::")
@@ -64,17 +88,19 @@ def apply(path: Path) -> tuple[str, bool]:
 
 def main(argv: list[str]) -> int:
     check_only = "--check" in argv
+    base = f"{CDN}/{cdn_key(argv)}/public"
     changed = []
     for path in sorted(ROOT.glob("[01][0-9].*.md")):
         if path.name.startswith("00."):
             continue
-        new, differs = apply(path)
+        new, differs = apply(path, base)
         if not differs:
             continue
         changed.append(path.name)
         if not check_only:
             path.write_text(new, encoding="utf-8")
     verb = "missing or stale" if check_only else "updated"
+    print(f"cdnKey: {base}")
     print(f"{len(changed)} chapter badge block(s) {verb}"
           + (f": {', '.join(changed)}" if changed else ""))
     return 1 if check_only and changed else 0

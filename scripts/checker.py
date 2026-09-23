@@ -189,10 +189,10 @@ def local_asset(kind, name):
 def asset_urls(kind, name):
     """The URLs to try when there is no local file, best first.
 
-    A WASM export has no filesystem, but everything under `public/` is served next to the
-    notebook and `mo.notebook_location()` is the URL it came from. The marimo pages on the website
-    are WASM too and have no `public/`, so they fall through to the repository over HTTPS -- which
-    is why it has to stay public.
+    A WASM export has no filesystem, but everything under `public/` is served beside the notebook
+    and `mo.notebook_location()` is the URL it came from -- `public/` being marimo's own
+    convention for bundled files. The marimo pages on the website are WASM too and have no bundle,
+    so they fall through to the repository over HTTPS -- which is why it has to stay public.
     """
     urls = []
     if mo is not None and hasattr(mo, "notebook_location"):
