@@ -6,7 +6,14 @@ node_modules/
 __pycache__/
 .jupyter-book-marimo/
 
-# generated before `curvenote submit` by scripts/build_lite.sh, not committed (21 MB)
-lite/
-_lite_src/
+# generated before `curvenote submit` by scripts/build_jupyter_lite.sh, not committed (27 MB)
+jupyter-lite/
+_jupyter_lite_src/
 .jupyterlite.doit.db
+
+# marimo edit writes a session cache beside the notebooks
+__marimo__/
+
+# generated marimo WASM apps and their staging directory
+marimo-apps/
+_marimo_src/

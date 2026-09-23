@@ -24,6 +24,12 @@ project:
   exclude:
     - README.md
     - scripts/**   # porting notes and converter sources, not book content
+  # What the "launch lite" and "open in marimo" badges point at. Both are generated and
+  # gitignored, so build them before `curvenote submit`:
+  #   bash scripts/build_jupyter_lite.sh && bash scripts/build_marimo_apps.sh
+  static_files:
+    - jupyter-lite
+    - marimo-apps
   plugins:
     - type: executable
       path: .venv/bin/jupyter-book-marimo

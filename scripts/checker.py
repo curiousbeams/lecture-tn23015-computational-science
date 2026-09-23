@@ -1,21 +1,121 @@
-"""The in-page runtime: everything a chapter's cells call that is not numpy or marimo.
+"""The in-page runtime: everything a chapter's cells call that is not numpy.
 
-This is the single source of truth. It is *copied* into each chapter's `{marimo-config}` header
-by `sync_checker.py` rather than imported, because there is no import to make: the header becomes
-a marimo setup cell running in the browser, where there is no filesystem and no package to
-install. MyST substitutions do not reach directive options (tested: `{{ checker }}` is passed
-through literally and the compile fails), and the plugin offers no include mechanism.
+This is the single hand-edited source, and it has two destinations, neither of which may drift
+from it:
 
-Copying keeps each page self-contained -- no extra network fetch to fail on load -- at the cost
-of ~280 duplicated lines per chapter, which nobody reads. Editing this file and running
+    scripts/sync_checker.py  ->  each chapter's `{marimo-config}` header, verbatim
+                             ->  packages/tn23015.py, with a prologue bolted on
 
-    .venv/bin/python scripts/sync_checker.py
+The header cannot `import` anything -- it becomes a marimo setup cell running in the reader's
+browser, where there is no filesystem and no package to install, and MyST substitutions do not
+reach directive options (tested: `{{ checker }}` is passed through literally). So it is copied.
+The notebooks *can* import, so they get a module instead. Both need the same code, and this file
+is it; `sync_checker.py --check` is what keeps the twelve copies honest.
 
-is what keeps the eleven copies honest; the script refuses to run if they have drifted apart.
+The one difference between the two homes is how a thing is *rendered*: marimo has `mo.md` and
+`mo.callout`, a Jupyter notebook has `IPython.display`, and a test script has neither. That is
+the whole job of the four `_md` / `_callout` / `_stack` / `_fold` helpers at the top --
+everything below them is environment-agnostic, which is why it can be shared byte for byte.
 
-`ANSWERS` is *not* here: the answer bank is per chapter, and the converter writes it above this
-block.
+`ANSWERS` is *not* here. The answer bank is per chapter: the converter writes it into the page
+header above this block, and `tn23015.py` loads it from `answers/*.json` instead.
 """
+
+# Which of the three is asked *first* matters. "Is marimo importable" is not the same question as
+# "am I running inside marimo": a student with marimo installed in their JupyterLab environment
+# took the marimo branch and every verdict came back as a `<marimo-callout-output>` element that
+# only that runtime can draw -- an empty box in a notebook. An *active IPython shell* is the
+# unambiguous signal, and a marimo island never has one, so this order leaves the site untouched.
+mo = _Markdown = _display = None
+try:
+    from IPython import get_ipython
+    _shell = get_ipython()              # None unless a kernel is actually running
+except ImportError:                     # pragma: no cover - no IPython at all
+    _shell = None
+
+if _shell is not None:                  # pragma: no cover - exercised in notebooks
+    from IPython.display import Markdown as _Markdown, display as _display
+else:
+    try:
+        import marimo as mo
+    except ImportError:                 # pragma: no cover - exercised from scripts
+        pass
+
+# A callout has no IPython equivalent, so it becomes a blockquote. The body already opens with
+# its own heading ("**Correct.**"), so nothing is added here -- an earlier version prefixed the
+# kind and every verdict came out saying it twice.
+
+
+def _md(text):
+    if mo is not None:
+        return mo.md(text)
+    if _Markdown is not None:
+        return _Markdown(text)
+    return text
+
+
+def _callout(body, kind):
+    if mo is not None:
+        return mo.callout(body, kind=kind)
+    text = body.data if hasattr(body, "data") else str(body)
+    return _md("\n".join("> " + ln if ln else ">" for ln in text.split("\n")))
+
+
+def _stack(items):
+    if mo is not None:
+        return mo.vstack(items)
+    if _display is not None:
+        for item in items:
+            _display(item)
+        return None
+    return items
+
+
+def _fold(label, body):
+    if mo is not None:
+        return mo.accordion({label: body})
+    return body                          # notebooks show it all; there is nothing to fold into
+
+
+def md(text):
+    """Markdown, for the few cells that write a line of prose next to their output."""
+    return _md(text)
+
+
+def row(*items):
+    if mo is not None:
+        return mo.hstack(list(items))
+    return _stack(list(items))
+
+
+class _Fixed:
+    """What a slider degrades to where nothing re-runs when you drag it.
+
+    marimo's reactivity is the whole point of `mo.ui.slider`: move it and every cell that reads
+    `.value` recomputes. A Jupyter notebook has no such thing, and wiring up `ipywidgets.interact`
+    would mean restructuring the exercise around a callback -- for a control that is a convenience,
+    not the thing being taught. So outside marimo it becomes a number with a note saying to edit
+    it, which is what the reader would otherwise have had to do anyway.
+    """
+
+    def __init__(self, value, label):
+        self.value, self.label = value, label
+
+    def __repr__(self):
+        return f"{self.label or 'value'} = {self.value}"
+
+    def _repr_markdown_(self):
+        return (f"*`{self.label or 'value'}` is **{self.value}**. Change it in the cell above "
+                f"and re-run to see another.*")
+
+
+def slider(start, stop, step=1, value=None, label="", show_value=False):
+    """A slider under marimo, a fixed number anywhere else."""
+    if mo is not None:
+        return mo.ui.slider(start, stop, step=step, value=value, label=label,
+                            show_value=show_value)
+    return _Fixed(start if value is None else value, label)
+
 
 def reference_answer(key):
     """Return (expected, comparator) for a stored answer, handling downsampled entries."""
@@ -69,13 +169,63 @@ DATA_URL = (
 )
 
 
-def load_data(name, **kwargs):
-    """np.loadtxt for a data file, working both in the browser and at build time."""
+def local_asset(kind, name):
+    """`answers/x.json` or `data/x.dat` as a real file, if this environment has one.
+
+    The repository has both; so does the JupyterLite bundle, which ships them beside the
+    notebooks. Walking up from the module *and* from the working directory covers being imported
+    from `packages/`, from beside the notebooks, and from a notebook opened several levels down.
+    """
+    from pathlib import Path
+
+    here = Path(__file__).resolve().parent if "__file__" in globals() else Path.cwd()
+    for base in (here, *here.parents, Path.cwd(), *Path.cwd().parents):
+        path = base / kind / name
+        if path.is_file():
+            return path
+    return None
+
+
+def asset_urls(kind, name):
+    """The URLs to try when there is no local file, best first.
+
+    A WASM export has no filesystem, but everything under `public/` is served next to the
+    notebook and `mo.notebook_location()` is the URL it came from. The marimo pages on the website
+    are WASM too and have no `public/`, so they fall through to the repository over HTTPS -- which
+    is why it has to stay public.
+    """
+    urls = []
+    if mo is not None and hasattr(mo, "notebook_location"):
+        here = mo.notebook_location()
+        if here is not None and str(here).startswith(("http://", "https://")):
+            urls.append(f"{here}/public/{kind}/{name}")
+    if kind == "data":
+        urls.append(DATA_URL + name)
+    return urls
+
+
+def fetch(url):
+    """A file-like object for a URL, under Pyodide or anywhere else."""
     try:
         from pyodide.http import open_url  # only exists under Pyodide
     except ImportError:
-        return np.loadtxt("data/" + name, **kwargs)  # build time: the local copy
-    return np.loadtxt(open_url(DATA_URL + name), **kwargs)
+        from urllib.request import urlopen
+        return urlopen(url)
+    return open_url(url)
+
+
+def load_data(name, **kwargs):
+    """np.loadtxt for one of the book's data files, wherever this is running."""
+    local = local_asset("data", name)
+    if local is not None:
+        return np.loadtxt(local, **kwargs)
+    last = None
+    for url in asset_urls("data", name):
+        try:
+            return np.loadtxt(fetch(url), **kwargs)
+        except Exception as exc:      # noqa: BLE001 - try the next candidate, report the last
+            last = exc
+    raise FileNotFoundError(f"{name} is not beside this notebook and could not be fetched: {last}")
 
 
 PRINTED = []
@@ -129,12 +279,12 @@ def format_printed(text):
     text = text.rstrip()
     lines = text.split("\n")
     if len(lines) <= PRINT_HEAD + PRINT_TAIL + 1:
-        return mo.md(f"```text\n{text}\n```")
+        return _md(f"```text\n{text}\n```")
     hidden = len(lines) - PRINT_HEAD - PRINT_TAIL
     shown = [*lines[:PRINT_HEAD], f"... {hidden} more lines ...", *lines[-PRINT_TAIL:]]
-    return mo.vstack([
-        mo.md("```text\n" + "\n".join(shown) + "\n```"),
-        mo.accordion({f"Show all {len(lines)} lines": mo.md(f"```text\n{text}\n```")}),
+    return _stack([
+        _md("```text\n" + "\n".join(shown) + "\n```"),
+        _fold(f"Show all {len(lines)} lines", _md(f"```text\n{text}\n```")),
     ])
 
 
@@ -206,16 +356,16 @@ def show(*objects, **blanks):
 
     if missing:
         names = ", ".join(f"`{m}`" for m in missing)
-        blocks.append(mo.md(f"*Waiting for {names}.*"))
+        blocks.append(_md(f"*Waiting for {names}.*"))
     elif not blocks and blanks:
         blocks.append(
-            mo.md(" · ".join(f"`{k}` {describe(v)}" for k, v in blanks.items()))
+            _md(" · ".join(f"`{k}` {describe(v)}" for k, v in blanks.items()))
         )
     if not blocks:
         # Never None. A cell whose output is None has no play button, so it cannot be run --
         # not now, and not after the reader fills it in either.
-        blocks.append(mo.md("*Nothing to display yet.*"))
-    return blocks[0] if len(blocks) == 1 else mo.vstack(blocks)
+        blocks.append(_md("*Nothing to display yet.*"))
+    return blocks[0] if len(blocks) == 1 else _stack(blocks)
 
 
 def is_unanswered(value):
@@ -260,10 +410,8 @@ def check_answers(*values, key, start=1, when=True, **named):
     """
     entries = [(None, v) for v in values] + list(named.items())
     if not when or all(is_unanswered(v) for _, v in entries):
-        return mo.callout(
-            mo.md("Waiting for your code: replace the `None` placeholders above."),
-            kind="warn",
-        )
+        return _callout(_md("Waiting for your code: replace the `None` placeholders above."),
+            "warn")
     report, ok, blank = [], True, False
     for i, (label, value) in enumerate(entries, start=start):
         name = f"{key}_{i}"
@@ -298,7 +446,7 @@ def check_answers(*values, key, start=1, when=True, **named):
     if ok and blank:
         # Nothing is wrong, something is simply not there yet. Red would be a lie, and a
         # discouraging one: the reader has half an exercise right and is told it is a failure.
-        return mo.callout(mo.md(f"**Still waiting.**\n\n{body}"), kind="warn")
+        return _callout(_md(f"**Still waiting.**\n\n{body}"), "warn")
     if ok:
-        return mo.callout(mo.md(f"**Correct.**\n\n{body}"), kind="success")
-    return mo.callout(mo.md(f"**Not quite yet.**\n\n{body}"), kind="danger")
+        return _callout(_md(f"**Correct.**\n\n{body}"), "success")
+    return _callout(_md(f"**Not quite yet.**\n\n{body}"), "danger")

@@ -191,7 +191,11 @@ def check_call(src: str):
 
 PLOT_WORD = re.compile(r"(?i)\b(plot|graph|histogram|scatter|imshow|figure)\b")
 SUBPLOTS = re.compile(r"^_fig\s*,\s*_ax\w*\s*=\s*plt\.subplots")
-DRAWS = re.compile(r"^[\w ,=]*_ax\w*\.(plot|imshow|hist|scatter|bar|semilog|loglog|errorbar"
+# Anchored hard at column zero. An earlier `^[\w ,=]*` let the space class swallow indentation,
+# so a draw call inside `if given(...):` counted as one that happens on load -- and the check
+# passed over every cell that creates its axes eagerly and only fills it once the reader starts.
+DRAWS = re.compile(r"^(?:\w+(?:\s*,\s*\w+)*\s*=\s*)?_ax\w*\."
+                   r"(plot|imshow|hist|scatter|bar|semilog|loglog|errorbar"
                    r"|step|contour|pcolor|fill|axhline|axvline)")
 MARKERS = ("# Do not edit or remove the boiler-plate code below.",
            "# Fill in the commented lines below, but leave the rest of this block in place.")

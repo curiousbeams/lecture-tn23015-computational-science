@@ -1667,3 +1667,208 @@ directive options, so `check_book.py` parses them itself.
 
 `check_book.py stubs` holds all of this: a plot prompt implies an axes that reaches `show`, no
 cell renders an empty axes on load, and no editable `show(...)` is unguarded.
+
+## 92. One hand-edited runtime, two generated homes
+
+`scripts/checker.py` and `packages/tn23015.py` were both hand-edited and shared 283 lines, of
+which 30 differed -- all of them the same four substitutions, because the browser always has
+marimo and a notebook may not:
+
+    mo.md(X)  ->  _md(X)      mo.callout(X, kind=K)  ->  _callout(X, K)
+    mo.vstack(X) -> _stack(X)  mo.accordion({L: B})  ->  _fold(L, B)
+
+I edited both by hand twice in one session (note 89, then the amber verdict). That is exactly the
+drift `sync_checker.py --check` prevents for the eleven headers, with nothing guarding this pair.
+
+So the four helpers moved *into* the shared source. `scripts/checker.py` is now the only copy
+anyone edits, and `sync_checker.py` writes twelve destinations from it: the eleven page headers,
+verbatim, and `packages/tn23015.py` with a prologue (`import numpy`) and epilogue (`_load_answers`
+and `ANSWERS`) that only a module needs. `--check` covers all twelve.
+
+## 93. "Is marimo importable" is not "am I inside marimo"
+
+The runtime picked its display path with `try: import marimo`. A student who has marimo installed
+in the same environment as JupyterLab therefore got `mo.callout(...)` in a Jupyter notebook --
+which renders as `<marimo-callout-output>`, a custom element only marimo can draw. Every verdict
+was an empty box. Caught by executing a generated notebook under `nbclient` with marimo
+deliberately installed alongside; it is invisible in an environment that happens to lack marimo,
+which is how it would have reached students.
+
+`marimo.running_in_notebook()` exists and answers the right question, but switching the *site*
+onto an untested predicate risks every page. The safe discriminator runs the other way: an active
+IPython shell means Jupyter, and a marimo island never has one.
+
+    from IPython import get_ipython
+    _shell = get_ipython()        # None unless a kernel is really running
+
+IPython first, marimo second, plain text last. The site's branch is unchanged, so nothing there
+could regress.
+
+## 94. The notebooks: what is ground truth and what is generated
+
+    marimo-notebooks/NN.slug.py     hand-edited ground truth for the exercises, no prose
+      |
+      +-> NN.slug.md                `sync_cells.py`, code blocks only; prose never touched
+      +-> jupyter-notebooks/*.ipynb `make_jupyter.py`, prose pulled from the markdown
+
+**Cell names are the join key**, and the prefix says what a cell is: `setup`, `head_5_01` (a
+markdown heading, notebook-only), `ex_5_01`, `check_5_01`, `sol_5_01`, `demo_01`. A check cell is
+matched to its exercise by its own `key="answer_5_01"` argument, not by position -- check cells
+sit *outside* the `{exercise-start}` region in the markdown. Only `ex_*` and `demo_*` show their
+code in marimo; checks and solutions are `hide_code=True`, so opening the notebook looks like the
+exercises and nothing else.
+
+**The round trip is the proof**: extract, sync back, `git diff` empty. Two things it caught.
+Cell bodies almost always open with a comment and comments are not AST nodes, so taking the body
+from `node.body[0].lineno` silently ate the first line of 65 cells. And the blank line between
+`:editor: true` and the code belongs to the page, not the cell. `sync_cells.py` also drops the
+`return x, y, y_prime` that `marimo edit` adds when it saves.
+
+**The hazard this architecture creates**: solving an exercise while exploring in `marimo edit`,
+then syncing, writes the answer into the book. It happened within ten minutes of the notebooks
+existing. `check_book.py checks` catches it -- a solved stub grades green where only amber is
+allowed -- so the workflow is sync, then run the harness.
+
+**The questions travel the other way.** Both notebooks carry the exercise prose, so neither is a
+heading and a stub that sends the reader back to the website for every exercise. It is *authored*
+in the markdown and generated into the `head_*` cells, exactly as the code is authored in the
+notebook and generated into the `{marimo}` blocks. Nothing is edited in two places, and
+`sync_cells.py --check` fails if either side moved without the other:
+
+    code       notebook  ->  markdown
+    questions  markdown  ->  notebook
+
+Converted on the way: `[](#ex_3_02)` becomes "Exercise 1.2" (a notebook has no MyST resolver),
+`wiki:` links become Wikipedia URLs, `:::{figure}` becomes an image served from the public
+repository, `:::{hint}` becomes a blockquote. The `mo.md` string is raw -- the questions are full
+of LaTeX, and `\lambda` in a cooked string is both a SyntaxWarning and the wrong character. It can
+sit indented inside the cell function because marimo dedents what it is given (checked: indented
+and flush produce identical HTML).
+
+Solutions are not generated into the Jupyter notebooks.
+
+## 95. The empty-axes check was passing on a regex bug
+
+Note 90 left `check_book.py stubs` asserting that no exercise renders an empty pair of axes on
+load. It reported zero, and two cells were doing exactly that -- Root Finding 3.1 and FT2 8.4 --
+because the pattern for "this line draws something" was
+
+    ^[\w ,=]*_ax\w*\.(plot|imshow|...)
+
+and `[\w ,=]*` contains a space, so it swallowed indentation. A draw call *inside*
+`if given(...):` counted as one that happens on load, which is the precise opposite of what the
+check is for. Anchored at column zero it finds both.
+
+Their shape was the same: the figure built eagerly at the top of the cell, everything that draws
+into it inside the guard. The fix is the one from note 90 in a different place -- `_ax` (or `_fig`)
+joins the placeholder chain as `None`, and `plt.subplots()` moves inside the guard, so the figure
+comes into existence when there is something to put in it.
+
+A check that passes is not evidence until it has been seen to fail. Both of these were introduced
+*by* note 90's pass and survived it.
+
+## 96. All eleven chapters extracted
+
+`extract_notebooks.py --all` now skips `00.*` (the index and about pages have no exercises).
+Eleven marimo notebooks, eleven Jupyter notebooks, the round trip exact for all of them, and
+every one of the twenty-two executes with zero errors.
+
+Getting the Jupyter side to zero needed two changes, both of which belong in the runtime rather
+than in a per-target patch:
+
+**`load_data` prefers a local file.** It used to decide by "is Pyodide here?", so outside the
+browser it read `data/<name>` relative to the *current directory* -- which is the repository when
+a script runs, and `jupyter-notebooks/` when a notebook does. It now walks up from the module and
+from the cwd looking for `data/`, and only falls back to the network if there is none. The
+JupyterLite bundle ships `data/` (4.8 MB) beside the notebooks exactly as it ships `answers/` and
+`tn23015.py`, so no reader's exercise depends on GitHub being reachable. Only the marimo pages
+fetch, because an island has no filesystem to put a file in.
+
+**`mo.ui.slider` became `slider`.** Six cells across FT2 and PDE2 used marimo's UI directly, which
+is a `NameError` in a notebook. The runtime now exports `slider`, `row` and `md`: under marimo they
+are `mo.ui.slider`, `mo.hstack` and `mo.md`; elsewhere the slider degrades to a fixed number whose
+repr says to edit it and re-run. Wiring up `ipywidgets.interact` would mean restructuring the
+exercise around a callback, for a control that is a convenience and not the thing being taught.
+
+**The drift guard earned its keep.** The rewrite that routed those calls through the runtime was
+applied to everything after `ANSWERS = {`, which includes the *runtime copied into the page
+header* -- so `mo.md` inside two headers became `md`. `sync_checker.py` refused to write ("the
+chapters' copies have drifted apart") instead of propagating it. Redone confined to `{marimo}`
+cell bodies.
+
+## 97. marimo can be served the same way JupyterLite is
+
+`marimo export html-wasm --mode edit` produces a self-contained Pyodide app: 28 MB, 740 files,
+and it needs an HTTP server (not `file://`), the same shape as the JupyterLite bundle.
+
+Measured, because it decides whether this is affordable: **two chapters exported separately
+produce byte-identical assets, and differ only in `index.html`.** The notebook source is embedded
+in that file, URL-encoded, inside a `<marimo-code>` element. So eleven chapters cost one 28 MB
+asset bundle plus eleven small HTML files -- not eleven times 28 MB.
+
+Two consequences for what a student export has to contain:
+
+* `import tn23015` cannot work there. Pyodide has no such module and the export bundles only the
+  notebook. The runtime has to be *embedded in the setup cell*, which is exactly what the markdown
+  headers already do -- a third destination for `sync_checker.py`, not a new problem.
+* `hide_code=True` is not protection. The source sits in `index.html` in plain view, so solutions
+  must be *absent* from a student export, not merely collapsed. That makes the solutions split a
+  prerequisite for this, rather than something to do afterwards.
+
+## 98. The marimo apps: what is shared, and why it all had to move together
+
+`marimo export html-wasm --mode edit` gives a self-contained Pyodide app per notebook, and there
+is no supported way to share anything between exports -- the docs say plainly that multiple
+notebooks need separate runs. Eleven untouched exports are **~310 MB**, almost all of it eleven
+identical copies of marimo's own JavaScript. The two flags the docs describe for this,
+`--single-file` and `--offline`, do not exist in marimo 0.24.0 *or* 0.24.2: the documentation is
+ahead of the release.
+
+Deduplicating afterwards brings it to **36 MB / 863 files, 13 MB zipped** -- the same order as the
+JupyterLite bundle beside it. Two things made that work, and the second cost two browser round
+trips to find:
+
+**`mo.notebook_location()` is derived from marimo's own web worker URL**, by crawling *out of*
+`assets/`:
+
+    .../03.root-finding/assets/worker-X.js  ->  .../03.root-finding
+    .../assets/worker-X.js                  ->  ...              (the server root)
+
+So sharing `assets/` at the top moves every runtime-resolved path to the top with it. The first
+attempt shared `assets/` but left `public/` per chapter, and the result was a page that booted,
+imported `tn23015` and ran the checker -- while every verdict said "no stored answer, skipping",
+because the answer bank was being fetched from the root and was not there.
+
+**The wheel is addressed differently again.** marimo writes `tn23015 @ ../public/wheels/...` into
+the page, relative to the *page*, so at a nested URL it resolves above the chapter directory. That
+is why the very first nested attempt was a `ModuleNotFoundError` while the same export served at
+its own root worked perfectly.
+
+One `public/` at the root satisfies both schemes: wheels, all eleven chapters' answers (1.1 MB)
+and both data files (4.9 MB), shared once. Sharing the answers turned out to *cost* nothing --
+staging them per chapter had been the same size, and the build lost a table of which chapter
+wanted which data file.
+
+The build verifies what it depends on rather than assuming it: `diff -rq` on each new export's
+`assets/` and `cmp` on each wheel, aborting if a future marimo release makes either per-notebook.
+
+marimo builds the `tn23015` wheel itself from the local module the notebooks import -- but it does
+*not* follow symlinks, which is why `marimo-notebooks/tn23015.py` is a real generated file and
+`sync_checker.py` writes thirteen copies rather than twelve.
+
+## 99. The two badges
+
+Every chapter carries both, generated by `scripts/add_launch_badges.py` and placed after its
+learning goals. The badges are the projects' own: `jupyterlite.rtfd.io/.../badge-launch.svg` reads
+"launch lite", `marimo.io/shield.svg` reads "open in marimo". marimo also publishes
+`molab-shield.svg` -- "Open in molab" -- which is their hosted service, not a self-hosted WASM
+export, so using it would have been a lie.
+
+The script is idempotent and finds its block by title, so the deploy URL is one edit in one file
+rather than eleven edits across the chapters. `--check` fails when a chapter is missing the block
+or carries a stale URL.
+
+`lite/` was renamed `jupyter-lite/` to pair with `marimo-apps/`, and `build_lite.sh` with it.
+`myst.yml` gained `static_files: [jupyter-lite, marimo-apps]`; both are gitignored, so a deploy
+means building them first -- confirmed to land in `_build/site/public/` unhashed, 1415 files
+between them.
