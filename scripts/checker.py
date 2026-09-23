@@ -237,36 +237,49 @@ def is_unanswered(value):
     return arr.dtype == object
 
 
-def check_answers(*values, key, start=1):
+def check_answers(*values, key, start=1, when=True, **named):
     """Compare the student's answers against the stored reference values.
+
+    Answers are handed over under the names the student gave them:
+
+        check_answers(x=x, y=y, y_prime=y_prime, key="answer_3_01")
+
+    so a wrong answer can be reported as `y_prime` rather than as `answer_3_01_3` -- a name that,
+    since the `answer_*` variables were folded into this call, exists nowhere in the exercise.
+    `key` plus the position in the call still selects the stored value to compare against, and
+    `start` is the index of the first one, for the few exercises that were split in two and whose
+    second half owns `..._4` onwards rather than `..._1`.
+
+    `when` gates the check. Some exercises hand out a pre-allocated `np.empty(N)` for the student
+    to fill: perfectly not-None, and so graded as wrong before a line has been written. Those pass
+    the condition that says the work has started -- `when=given(dVdt)`, `when=not unfinished` --
+    and stay amber until it does.
 
     Returns an mo.callout so the result renders in the cell, green/red/amber, in the style of
     mograder's student-facing check().
-
-    `start` is the index of the first answer, for the few exercises that were split in two and
-    whose second half owns `..._4` onwards rather than `..._1`.
     """
-    report, ok = [], True
-    blanks = [f"{key}_{i}" for i, v in enumerate(values, start=start) if is_unanswered(v)]
-    if len(blanks) == len(values):
+    entries = [(None, v) for v in values] + list(named.items())
+    if not when or all(is_unanswered(v) for _, v in entries):
         return mo.callout(
             mo.md("Waiting for your code: replace the `None` placeholders above."),
             kind="warn",
         )
-    for i, value in enumerate(values, start=start):
+    report, ok, blank = [], True, False
+    for i, (label, value) in enumerate(entries, start=start):
         name = f"{key}_{i}"
+        label = label or name
         if is_unanswered(value):
-            ok = False
-            report.append(f"`{name}` has not been filled in yet.")
+            blank = True
+            report.append(f"`{label}` has not been filled in yet.")
             continue
         if name not in ANSWERS:
-            report.append(f"`{name}` has no stored answer, skipping.")
+            report.append(f"`{label}` has no stored answer, skipping.")
             continue
         sol, shape, stride = reference_answer(name)
         ans = np.asarray(value)
         if ans.shape != shape:
             ok = False
-            report.append(f"`{name}` has the wrong shape: expected `{shape}`, got `{ans.shape}`.")
+            report.append(f"`{label}` has the wrong shape: expected `{shape}`, got `{ans.shape}`.")
             continue
         if stride > 1:
             ans = ans[tuple(slice(None, None, stride) for _ in range(ans.ndim))]
@@ -274,14 +287,18 @@ def check_answers(*values, key, start=1):
         atol = 1e-3 * np.max(np.abs(finite)) if finite.size else 1e-8
         atol = float(atol) or 1e-8
         if np.allclose(ans, sol, atol=atol, equal_nan=True):
-            report.append(f"`{name}` is correct.")
+            report.append(f"`{label}` is correct.")
         else:
             ok = False
             report.append(
-                f"`{name}` has the right shape but incorrect values:\n\n"
+                f"`{label}` has the right shape but incorrect values:\n\n"
                 f"```\n{diff_report(sol, ans, atol)}\n```"
             )
     body = "\n\n".join(f"- {line}" if "\n" not in line else line for line in report)
+    if ok and blank:
+        # Nothing is wrong, something is simply not there yet. Red would be a lie, and a
+        # discouraging one: the reader has half an exercise right and is told it is a failure.
+        return mo.callout(mo.md(f"**Still waiting.**\n\n{body}"), kind="warn")
     if ok:
         return mo.callout(mo.md(f"**Correct.**\n\n{body}"), kind="success")
     return mo.callout(mo.md(f"**Not quite yet.**\n\n{body}"), kind="danger")

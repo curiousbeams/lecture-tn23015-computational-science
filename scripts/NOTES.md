@@ -1540,3 +1540,130 @@ check would have:
 * `outputs` -- no solution displays nothing (note 70)
 
 It exits non-zero, so it can gate a deploy.
+
+## 89. The `answer_*` variables are gone
+
+The TAs' first complaint was the visible machinery. Every exercise ended with a block the reader
+was told not to touch:
+
+```python
+# Do not edit the boiler-plate code below.
+answer_5_02_1 = np.copy(tempsun)
+
+show(tempsun=tempsun)
+```
+
+`check_answers` now takes the reader's own variables, by keyword, and the block goes:
+
+```python
+check_answers(tempsun=tempsun, key="answer_5_02")
+```
+
+143 assignments went; the "do not edit" heading went with them wherever it no longer introduced
+anything, halving from 107 to 54. The survivors front real plumbing -- a guarded plot, an
+`if given(...)` display -- not bookkeeping.
+
+**Keyword, not positional.** The plan said positional. Positional loses the name: a wrong answer
+would be reported as `` `answer_3_01_3` ``, which after this change exists nowhere in the book.
+The keyword is the name the reader typed, it matches `show(...)`'s existing convention, and it
+costs one repetition per argument in a cell whose code is never echoed.
+
+**The stored answer is still selected by position** -- the first argument is compared against
+`..._1`. Nothing in the source says so any more, so `check_book.py grading` replays every check
+cell with its own reference answers and requires green, then spoils the first one and requires it
+back by name. That check is the whole reason to trust the fold.
+
+**`when=`, for the exercises that hand out a pre-allocated array.** `V = np.empty(N)` is not None,
+so the old code kept the answer behind `if given(dVdt):`. The gate moves to the check cell, which
+is invisible, and the exercise cell keeps nothing:
+
+```python
+check_answers(V=V, key="answer_11_1", when=given(dVdt))
+```
+
+**`_unfinished` became `unfinished`.** The switch had to be readable from the check cell, and
+underscore names are cell-local in marimo. As an ordinary global it must be unique per page, so
+PDE1's three are `unfinished`, `unfinished_2`, `unfinished_3`.
+
+**Half-done is amber now, not red.** An exercise with one answer right and one still blank was
+graded `**Not quite yet.**` in red. Red should mean wrong. It is now `**Still waiting.**` in amber
+whenever nothing is actually wrong, with the same per-answer report.
+
+**Two traps, both hit.**
+
+A whole-file `re.sub` for `answer_11_5_1` -> `x_2` also rewrote the *keys* of the `ANSWERS` bank
+in the page header, silently un-gradeable. Caught by the new `grading` check, which is exactly
+what it is for. Renames near this book need to know what is a variable and what is a string key.
+
+Collapsing `\n\n\n+` after deleting lines reached the prose, which carries a hand-made style pass.
+Sixteen blank lines in eleven files. Restored by diffing against HEAD and re-inserting only the
+runs that fell outside a code fence.
+
+**Two pre-existing gaps surfaced, neither introduced here.** `answer_6_02` in LA was assigned and
+never checked -- no check cell was ever written for it -- so the dead assignment went. And
+`answer_8_2c_1` (`diffraction_pattern`) is absent from the original answer source, so that one
+part of FT2 8.2(c) is not graded; `check_answers` says "no stored answer, skipping" and the
+`grading` check prints it as a note.
+
+## 90. `_ax` is a blank like any other
+
+Fourteen exercises said "now make a plot" and then ended `show(x=x, y=y)`. A reader who wrote
+`_fig, _ax = plt.subplots()` and `_ax.plot(x, y)` saw **nothing** -- no figure, no error, no
+explanation. `show` only renders what it is handed.
+
+They clustered in the ODE chapters (ODE1 ×7, ODE2 ×4, ND ×2, FT2 ×1), which is where "solve it,
+then plot it" is the whole idiom. Two of the fourteen already wrote `# _ax.plot(...)` as a hint
+for an `_ax` the cell never defined.
+
+The fix treats the axes as another blank, declared with the rest:
+
+```python
+# Fill these in as you work through the exercise.
+_ax = x = y = None
+
+# Now the plot (with labels and legend of course!)
+# _fig, _ax = plt.subplots()
+# ...
+
+show(_ax, x=x, y=y)
+```
+
+**No runtime change was needed.** `show` has always done `blocks.extend(d for d in displays if d
+is not None)`, so a `None` axes is skipped and the cell still renders its waiting message. Six of
+the fourteen cells had no placeholder line at all (ODE1 hands out a pre-allocated `np.empty`
+instead), so they gained one.
+
+**The alternative was worse than it looked.** Creating the axes eagerly -- `_fig, _ax =
+plt.subplots()` uncommented -- is what 34 other stubs do, but 25 of those *draw* something into
+it first: the function being differentiated, the data being fitted. Only 9 rendered an empty box,
+and those 9 were themselves a defect, not a precedent. They are now `None` too, so the eager
+form is gone from the book. Commenting out the `_ax` argument inside `show(...)` was the third
+option and the worst: it asks the reader to edit the call in a second place, and uncommenting
+`_ax` without defining it is a `NameError`.
+
+## 91. The `show(...)` line needs its warning back
+
+Folding `answer_*` away (note 89) deleted the `# Do not edit the boiler-plate code below.`
+heading from 53 cells, because the block it introduced had gone. But `show(...)` was still there,
+and it is the one line a reader must not delete: a cell whose output is None has no run button,
+so deleting it costs them everything typed on the page.
+
+Every editable exercise cell now carries the marker directly above `show(...)`, reworded to
+`# Do not edit or remove the boiler-plate code below.` -- "remove" is the failure that actually
+happens.
+
+Four cells get different wording. Their guarded block contains commented lines the reader is
+*meant* to fill in (`# _ax.plot(t, V_4, ...)`), so "do not edit" was already a lie there, three
+of them before this session:
+
+```python
+# Fill in the commented lines below, but leave the rest of this block in place.
+```
+
+`:editor: false` cells are exempt and must stay exempt: they are read-only demonstrations, the
+reader cannot delete anything in them, and a warning there is noise. The first draft of the check
+did not know the difference and flagged eight of them -- `extract_cells_tagged` drops the
+directive options, so `check_book.py` parses them itself.
+
+`check_book.py stubs` holds all of this: a plot prompt implies an axes that reaches `show`, no
+cell renders an empty axes on load, and no editable `show(...)` is unguarded.
