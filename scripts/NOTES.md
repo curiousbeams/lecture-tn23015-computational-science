@@ -1958,3 +1958,43 @@ Three things had to follow the removal, or coverage would have quietly gone to z
 **What this does not do.** The repository is public and `marimo-notebooks/*.py` carries every
 `sol_*` cell in plain sight -- not merely in history, in HEAD. This takes the solutions off the
 student's *path*; it does not make them secret, and nobody should tell the TAs otherwise.
+
+## 103. Getting under the 954-file ceiling
+
+Curvenote uploads exactly 954 files and silently drops the rest -- measured on three deploys of
+1415, 1056 and 1056 files, all of which landed 954. It is not mimetype and not nesting, and the
+cross-tabs are what rule those out rather than an argument:
+
+    extension  present missing        depth  present missing
+       .js        584      87            2      769      87
+       .json      143      12            3       49      14
+       .dat         2       2            5      105       1
+       .css        15       0            1       14       0
+
+Every extension that loses files also keeps files -- `.dat` splits two and two out of four -- and
+every depth does the same. Nothing about a file predicts whether it arrives; only its position in
+sort order does.
+
+**Neither runtime can be shipped as an archive.** marimo 0.24.0 has no single-file export and no
+CDN-asset mode: the documented `--single-file` and `--offline` flags are not in the shipped CLI,
+and there is no newer release. JupyterLite is a webpack build of JupyterLab. Serving a zip would
+mean a service worker unpacking it on every request, which is a bespoke layer over two apps we do
+not control.
+
+So the file count came down instead, 1056 -> **914**, by three measured savings:
+
+* **90 duplicate icons.** Every marimo export ships the same nine favicons and manifests,
+  byte-identical across all eleven (checked with `md5`). Shared at the root like `assets/`, with
+  `"./favicon.ico"` rewritten to `"../favicon.ico"`. 504 -> 414 files.
+* **JupyterLite builds five apps we never link to.** The badges only open `lab/index.html`;
+  `--apps lab --no-unused-shared-packages --no-sourcemaps` drops `repl`, `tree`, `notebooks`,
+  `edit` and `consoles`. 552 -> 500. The remaining 413 are JupyterLab's own webpack output and
+  are the floor for a supported build.
+* **The site build never deletes what it copied before.** `static_files` accumulates in
+  `_build/site/public/`, so a deploy went out with 1172 files where the source had 914 -- stale
+  chunks from marimo versions we had already replaced. Both build scripts now clear their own
+  directory there first.
+
+40 files of headroom is not much, and one marimo release could spend it. This is a stopgap while
+Curvenote look at the upload; the durable fixes are their bug or hosting the bundles somewhere
+without a ceiling.

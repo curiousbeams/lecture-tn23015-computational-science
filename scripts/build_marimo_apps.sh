@@ -34,6 +34,10 @@ cd "$(dirname "$0")/.."
 OUT=marimo-apps
 STAGE=_marimo_src
 
+# Also clear what the site build copied last time: mystmd copies `static_files` in but never
+# removes files that have gone, so `_build/site/public/` accumulates. A deploy was once 1172
+# files where the source had 914 -- stale copies of chunks two marimo versions old.
+rm -rf _build/site/public/marimo-apps
 rm -rf "$STAGE" "$OUT"
 mkdir -p "$STAGE" "$OUT/public/wheels"
 .venv/bin/python scripts/make_student_notebooks.py --out "$STAGE" >/dev/null
@@ -51,9 +55,23 @@ for nb in "$STAGE"/[01][0-9].*.py; do
       || { echo "assets differ for $slug -- the shared copy is not safe"; exit 1; }
     rm -rf "$OUT/$slug/assets"
   fi
+  # Every export also ships marimo's nine icons and manifests, byte-identical (checked) -- 90
+  # redundant files across eleven chapters, which matters when the deploy has a file-count
+  # ceiling. They move up beside `assets/` and the page is pointed a level up for both.
+  for f in "$OUT/$slug"/*; do
+    base=$(basename "$f")
+    [ "$base" = "index.html" ] && continue
+    [ -d "$f" ] && continue
+    if [ -e "$OUT/$base" ] && ! cmp -s "$f" "$OUT/$base"; then
+      echo "$base differs for $slug -- the shared copy is not safe"; exit 1
+    fi
+    mv -f "$f" "$OUT/$base"
+  done
+
   # not `sed -i` -- BSD wants an argument to it and GNU refuses one, and this has to run on
   # whatever machine is reproducing a deploy
-  sed 's|"\./assets/|"../assets/|g' "$OUT/$slug/index.html" > "$OUT/$slug/index.html.tmp"
+  sed -e 's|"\./assets/|"../assets/|g' -e 's|"\./\([a-z0-9.-]*\)"|"../\1"|g' \
+    "$OUT/$slug/index.html" > "$OUT/$slug/index.html.tmp"
   mv "$OUT/$slug/index.html.tmp" "$OUT/$slug/index.html"
 
   for whl in "$OUT/$slug"/public/wheels/*.whl; do

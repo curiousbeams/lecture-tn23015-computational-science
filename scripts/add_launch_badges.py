@@ -52,7 +52,7 @@ def cdn_key(argv: list[str]) -> str:
 TITLE = ":::{admonition} Rather work in a notebook?"
 LITE_BADGE = "https://jupyterlite.rtfd.io/en/stable/_static/badge-launch.svg"
 MARIMO_BADGE = "https://marimo.io/shield.svg"
-ANCHOR = ":::{admonition} Learning goals"
+ANCHOR = ":::{exercise-start}"
 
 
 def block(slug: str, base: str) -> str:
@@ -70,20 +70,35 @@ def block(slug: str, base: str) -> str:
 
 
 def apply(path: Path, base: str) -> tuple[str, bool]:
-    """(new text, changed). Replaces an existing block, or inserts one after the learning goals."""
+    """(new text, changed). The block goes immediately before the chapter's first exercise.
+
+    Not at the top of the chapter: these are an alternative way to do the *exercises*, so the
+    reader meets them where there is first something to do. Every chapter now introduces its
+    exercises under a heading that names the topic -- there is no generic "Exercises" section to
+    anchor to, and there should not be -- so the first `{exercise-start}` is what means the same
+    thing in all eleven.
+    """
     text = path.read_text(encoding="utf-8")
-    want = block(path.stem, base)
-    if TITLE in text:
-        start = text.index(TITLE)
-        end = text.index("\n:::", text.index("\n", start)) + len("\n:::")
-        new = text[:start] + want + text[end:]
-    else:
-        lines = text.split("\n")
-        at = next(i for i, ln in enumerate(lines) if ln.startswith(ANCHOR))
-        close = next(i for i in range(at + 1, len(lines)) if lines[i].rstrip() == ":::")
-        lines[close + 1:close + 1] = ["", *want.split("\n")]
-        new = "\n".join(lines)
-    return new, new != text
+    lines = strip_block(text.split("\n"))
+    at = next(i for i, ln in enumerate(lines) if ln.startswith(ANCHOR))
+    lines[at:at] = [*block(path.stem, base).split("\n"), ""]
+    return "\n".join(lines), "\n".join(lines) != text
+
+
+def strip_block(lines: list[str]) -> list[str]:
+    """The page without its badge block, wherever it currently sits."""
+    if TITLE not in lines:
+        return lines
+    start = lines.index(TITLE)
+    end = next(i for i in range(start + 1, len(lines)) if lines[i].rstrip() == ":::")
+    del lines[start:end + 1]
+    while start < len(lines) and not lines[start].strip():
+        del lines[start]
+    while start and not lines[start - 1].strip():
+        del lines[start - 1]
+        start -= 1
+    lines[start:start] = [""]
+    return lines
 
 
 def main(argv: list[str]) -> int:

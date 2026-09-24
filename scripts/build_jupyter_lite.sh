@@ -9,6 +9,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# See the note in build_marimo_apps.sh: the site build never deletes static_files it copied
+# before, so the stale copy goes here too.
+rm -rf _build/site/public/jupyter-lite
 rm -rf _jupyter_lite_src jupyter-lite .jupyterlite.doit.db
 mkdir -p _jupyter_lite_src
 cp jupyter-notebooks/*.ipynb _jupyter_lite_src/
@@ -19,7 +22,8 @@ cp -r data _jupyter_lite_src/data
 
 uv run --no-project \
   --with jupyterlite-core --with jupyterlite-pyodide-kernel --with jupyter-server \
-  jupyter lite build --contents _jupyter_lite_src --output-dir jupyter-lite
+  jupyter lite build --contents _jupyter_lite_src --output-dir jupyter-lite \
+  --apps lab --no-unused-shared-packages --no-sourcemaps
 
 # 48 MB of the 69 MB a plain build produces is source maps for JupyterLab itself, which no
 # reader needs. Dropping them is the difference between 21 MB and 69 MB in the deploy.
