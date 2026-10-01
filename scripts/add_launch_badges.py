@@ -61,6 +61,10 @@ MARIMO_BADGE = "https://marimo.io/shield.svg"
 ANCHOR = ":::{exercise-start}"
 
 
+# "Save, then download" is not a figure of speech. In the WASM build, Download notebook source reads
+# the copy held by marimo's save worker, which starts out empty, so before the first save it
+# downloads a 0-byte notebook.py without any error. (marimo.app behaves the same.) Markdown, HTML
+# and flat-script exports work without saving; Jupyter is greyed out in WASM.
 def block(slug: str, base: str) -> str:
     return "\n".join([
         TITLE,
@@ -69,7 +73,8 @@ def block(slug: str, base: str) -> str:
         "The same exercises, without the surrounding explanation, running in your browser with nothing to install.",
         "The Lite notebook keeps your edits in this browser if you close the tab, but not on another device, after"
         " you clear your browsing data, or when the notebooks are updated: use File → Download to keep a copy.",
-        "The marimo version is a scratchpad, and nothing you type there is saved.",
+        "The marimo version loses your edits when you close the tab: to keep a copy, save (Ctrl+S, or ⌘S on a Mac)"
+        " and then choose Download → Download notebook source from the menu.",
         "",
         f"[![launch lite]({LITE_BADGE})]({base}/jupyter-lite/lab/index.html?path={slug}.ipynb)",
         f"[![open in marimo]({MARIMO_BADGE})]({base}/marimo-apps/{slug}/index.html)",
