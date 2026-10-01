@@ -60,8 +60,10 @@ def block(slug: str, base: str) -> str:
         TITLE,
         ":class: seealso",
         "",
-        "The same exercises, without the surrounding explanation, running in your browser.",
-        "Nothing to install — and nothing is saved, so download your work before you close the tab.",
+        "The same exercises, without the surrounding explanation, running in your browser with nothing to install.",
+        "The Lite notebook keeps your edits in this browser between visits, but not on another device or after you"
+        " clear your browsing data: use File → Download to keep a copy.",
+        "The marimo version is a scratchpad, and nothing you type there is saved.",
         "",
         f"[![launch lite]({LITE_BADGE})]({base}/jupyter-lite/lab/index.html?path={slug}.ipynb)",
         f"[![open in marimo]({MARIMO_BADGE})]({base}/marimo-apps/{slug}/index.html)",

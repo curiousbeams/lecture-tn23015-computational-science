@@ -25,6 +25,7 @@ project:
     - README.md
     - REPRODUCING-THE-UPLOAD-BUG.md   # for Curvenote, not book content
     - scripts/**   # porting notes and converter sources, not book content
+    - assignment-solutions/**   # private solution keys and TA guides, gitignored
   # What the "launch lite" and "open in marimo" badges point at. Both are generated and
   # gitignored, so build them before `curvenote submit`:
   #   bash scripts/build_jupyter_lite.sh && bash scripts/build_marimo_apps.sh
@@ -107,6 +108,8 @@ project:
     RK4: fourth-order Runge-Kutta
     FTCS: Forward-Time Central-Space
     RC: resistor-capacitor
+    MSD: mean-squared displacement
+    MC: Monte Carlo
   toc:
     - file: 00.index.md
     - file: 00b.about.md
@@ -121,6 +124,25 @@ project:
     - file: 09.ordinary-differential-equations-2.md
     - file: 10.partial-differential-equations-1.md
     - file: 11.partial-differential-equations-2.md
+    - title: Computational Assignments
+      children:
+        - file: assignments/computational-assignments.md
+        - title: Quantum Mechanics
+          children:
+            - file: assignments/quantum-mechanics/quantum-domains.md
+            - file: assignments/quantum-mechanics/yukawa.md
+            - file: assignments/quantum-mechanics/tunnelling.md
+            - file: assignments/quantum-mechanics/scattering.md
+            - file: assignments/quantum-mechanics/slit-interference.md
+
+        - title: Statistical Physics
+          children:
+            - file: assignments/statistical-physics/lennard-jones.md
+            - file: assignments/statistical-physics/einstein-ising.md
+            - file: assignments/statistical-physics/brownian-motion.md
+            - file: assignments/statistical-physics/chemotaxis.md
+            - file: assignments/statistical-physics/ion-channels.md
+
 site:
   template: book-theme
   options:
