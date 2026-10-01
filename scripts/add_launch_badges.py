@@ -34,6 +34,12 @@ ROOT = Path(__file__).resolve().parent.parent
 # badges point at a deploy that contains the bundles they keep working. The order is therefore:
 # submit, run this, submit again -- and after that only when the notebooks themselves change.
 #
+# Moving the key also resets every student's Lite notebooks. JupyterLite keeps edits in an
+# IndexedDB store named after the page URL, and the URL contains the key, so a new key opens an
+# empty store; the old work stays reachable only at the old URL. That is accepted on purpose:
+# pinning the store name (`contentsStorageName`) keeps work across keys, but then a student's saved
+# copy shadows the fixed notebook, which is worse for a mid-course bugfix.
+#
 # Every link ends in an explicit file. `pub.curvenote.com` is object storage -- it has no
 # directory indexes, so `.../lab/` is a 404 (`NoSuchKey`) while `.../lab/index.html` is a 200.
 CDN = "https://pub.curvenote.com"
@@ -61,8 +67,8 @@ def block(slug: str, base: str) -> str:
         ":class: seealso",
         "",
         "The same exercises, without the surrounding explanation, running in your browser with nothing to install.",
-        "The Lite notebook keeps your edits in this browser between visits, but not on another device or after you"
-        " clear your browsing data: use File → Download to keep a copy.",
+        "The Lite notebook keeps your edits in this browser if you close the tab, but not on another device, after"
+        " you clear your browsing data, or when the notebooks are updated: use File → Download to keep a copy.",
         "The marimo version is a scratchpad, and nothing you type there is saved.",
         "",
         f"[![launch lite]({LITE_BADGE})]({base}/jupyter-lite/lab/index.html?path={slug}.ipynb)",

@@ -28,17 +28,4 @@ uv run --no-project \
 # 48 MB of the 69 MB a plain build produces is source maps for JupyterLab itself, which no
 # reader needs. Dropping them is the difference between 21 MB and 69 MB in the deploy.
 find jupyter-lite -name "*.map" -type f -delete
-
-# Pin where JupyterLite keeps a reader's edits. By default it is an IndexedDB store named
-# "JupyterLite Storage - <baseUrl>", and the baseUrl contains Curvenote's cdnKey, which changes
-# with every submission -- so each redeploy would hand students fresh notebooks and strand their
-# work under the old URL. A fixed name keeps it across redeploys (still per browser and origin).
-.venv/bin/python - <<'EOF'
-import json, pathlib
-path = pathlib.Path("jupyter-lite/jupyter-lite.json")
-config = json.loads(path.read_text())
-config["jupyter-config-data"].update({"contentsStorageName": "tn23015", "settingsStorageName": "tn23015"})
-path.write_text(json.dumps(config, indent=2) + "\n")
-print("pinned JupyterLite storage name: tn23015")
-EOF
 du -sh jupyter-lite
