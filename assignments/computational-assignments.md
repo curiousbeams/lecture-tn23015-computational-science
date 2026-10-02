@@ -33,11 +33,9 @@ The schedule and groups are on the [Brightspace](https://brightspace.tudelft.nl/
 ## Assignments structure
 
 Every assignment has four core parts and ends with one open question.
-
 The first part usually builds the functions that the rest of the assignment reuses, so it is worth doing together as a group.
 After that, many teams find it works well to divide the middle parts between them and come back together for the open question.
 How you divide the work is up to you, and the natural split differs from one assignment to the next.
-
 Each part ends with numbered exercises.
 Answer these in your report, supported by your own figures and numbers.
 
@@ -61,7 +59,7 @@ Use Python with NumPy, SciPy, and Matplotlib, i.e. the same packages as in the r
 Where a part asks you to use a method from the book, such as your own bisection or RK4 implementation, write and use it there.
 Elsewhere, library routines such as `scipy.integrate.solve_ivp` or `scipy.linalg.eigh` are fine.
 
-## A note on using AI
+## Another note on AI usage
 
 An AI assistant can write a lot of the code in these assignments.
 As with the exercises in this book, we are not going to pretend otherwise.

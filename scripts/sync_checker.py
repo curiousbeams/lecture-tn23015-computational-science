@@ -24,7 +24,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CHAPTERS = sorted(
     p for p in ROOT.glob("[01][0-9].*.md") if not p.name.startswith(("00.", "00b."))
-)
+) + [ROOT / "00b.about.md"]  # its live demo of the exercise format runs on the same runtime
 HEADER_OPEN = "header: |"
 MODULE = ROOT / "packages" / "tn23015.py"
 # marimo builds a wheel from every local module a notebook imports, and puts it in the WASM

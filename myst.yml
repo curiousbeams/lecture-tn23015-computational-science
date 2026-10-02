@@ -147,3 +147,4 @@ site:
   template: book-theme
   options:
     style: ./static/custom.css
+    hide_outline: true
