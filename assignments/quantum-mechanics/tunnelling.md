@@ -6,13 +6,18 @@ numbering:
   enumerator: QM3.%s
 ---
 
-A particle in a double well can be found on either side of the barrier, even when its energy is below the top of the barrier.
-In this assignment you first solve a familiar one-well problem in two independent ways, then use those tools to find the stationary states of a double well.
-Combining just two of these states lets you follow a particle as it tunnels back and forth between the wells.
+A *double well* is a potential with two minima separated by a barrier.
+Classically, a particle whose energy is below the top of the barrier stays in the well where it starts.
+Quantum mechanically it does not: it can *tunnel* through the barrier, and its probability moves back and forth between the two wells.
+In this assignment you first solve a familiar one-well problem, the harmonic oscillator, in two independent ways, then use those tools to find the stationary states of a double well.
+Combining just two of these states lets you follow a particle as it tunnels from one well to the other.
 
 *How does the energy difference between two stationary states set the time it takes a particle to tunnel from one well to the other?*
 
-We use dimensionless units: length in $\sqrt{\hbar/m\omega}$, energy in $\hbar\omega$ and time in $1/\omega$ for a reference frequency $\omega$.
+## The model
+
+We measure length in units of $\sqrt{\hbar/m\omega}$, energy in units of $\hbar\omega$, and time in units of $1/\omega$, where $\omega$ is the angular frequency of the harmonic oscillator of Parts 1 and 2.
+Every quantity below, including $x$, $L$, $V_b$ and $b$, is dimensionless.
 The stationary Schrödinger equation is then
 
 $$
@@ -21,80 +26,19 @@ $$
 
 and we solve it on a finite interval $-L \leq x \leq L$ that stands in for the whole line: its ends are not physical walls.
 
-## Part 1: Stationary states by shooting
-
-For the harmonic oscillator, $V(x) = x^2/2$, the two lowest states are known exactly:
-
-$$
-E_0 = \tfrac12, \quad \psi_0(x) = \pi^{-1/4} e^{-x^2/2}, \qquad
-E_1 = \tfrac32, \quad \psi_1(x) = \sqrt2\,x\,\psi_0(x).
-$$
-
-They are your reference for everything in Parts 1 and 2.
-
-The stationary equation can be written as $\psi'' = (x^2 - 2E)\,\psi$, a second-order ODE that you can rewrite as two first-order ones for $\psi$ and $\psi'$.
-Integrating it from $x = 0$ outwards for a *trial* energy $E$ gives a solution that blows up at large $x$ unless $E$ is exactly an energy level: this is the *shooting method* of [](#ordinary-differential-equations-2_page).
-
-- Integrate outward from $x = 0$ to $x = L = 5$ with your RK4 implementation, with step $0.02$, starting from $\psi(0) = 1$, $\psi'(0) = 0$ (an even state).
-  Plot the solutions for trial energies $E = 0.3$, $0.5$ and $0.7$.
-- The shooting function $F(E) = \psi_E(L)$ changes sign as $E$ passes through an energy level.
-  Use your bisection from [](#root-finding_page) on $F$ to find the even ground state, and with $\psi(0) = 0$, $\psi'(0) = 1$, the odd first excited state.
-- Extend each solution to $x < 0$ using its parity, normalise it with a numerical integral over $[-L, L]$, and compare energies and wavefunctions with the exact ones.
-- Check your result once: halve the integration step, and separately change $L$ from 5 to 4, and report how the energies change.
-
-:::{exercise}
-:label: ex-qm1-shooting
-
-Why do trial energies just above and just below the ground-state energy both give a solution that blows up, and with opposite signs?
-How do the starting conditions select even and odd states?
-:::
-
-:::{exercise}
-:label: ex-qm1-precision
-
-How well do your energies and wavefunctions agree with the exact ones?
-Which part of the remaining error comes from the integration step, and which from the finite endpoint $L$?
-Why does a very narrow final bisection bracket alone not mean that your energy is accurate?
-:::
-
-## Part 2: The Hamiltonian as a matrix
-
-Now solve the same problem in a completely different way.
-Represent $\psi$ by its values $\psi_i$ on a uniform grid of $N$ points on $[-L, L]$, with spacing $h = 2L/(N-1)$, and set $\psi = 0$ at both ends, so that only the $N-2$ interior values are unknown.
-With the second-derivative formula of [](#numerical-differentiation_page),
-
-$$
-(\hat H \psi)_i \approx -\frac{\psi_{i+1} - 2\psi_i + \psi_{i-1}}{2h^2} + V(x_i)\,\psi_i ,
-$$
-
-the Schrödinger equation becomes a matrix eigenvalue problem $H\vec\psi = E\vec\psi$, which you can solve with the tools of [](#linear-algebra_page).
-
-- Build the matrix $H$ for the oscillator with $L = 5$ and $N = 501$, and find its three lowest eigenvalues and eigenvectors, for example with `scipy.linalg.eigh`.
-- Turn each eigenvector into a wavefunction normalised as $\int |\psi|^2 dx = 1$, and restore the zero end values.
-- Compare the three lowest energies with $E_n = n + \tfrac12$ and the two lowest with your shooting results, and plot the wavefunctions.
-
-:::{exercise}
-:label: ex-qm1-matrix
-
-What are the diagonal and off-diagonal elements of your matrix, and how do the zero boundary values enter the first and last rows?
-How did you turn an eigenvector into a normalised wavefunction?
-Do the two methods agree with each other and with the exact energies, and what limits the agreement?
-:::
-
-## Part 3: Two wells and a small splitting
-
-Replace the oscillator by the symmetric double well
+Parts 1 and 2 use the harmonic oscillator, $V(x) = x^2/2$.
+Parts 3 and 4 use the double well
 
 $$
 V(x) = V_b \left[\left(\frac{x}{b}\right)^2 - 1\right]^2 ,
 $$
 
-with minima at $x = \pm b$ and a central barrier of height $V_b$.
-Near each minimum the well is approximately harmonic, $V \approx \tfrac12 \omega_\mathrm{local}^2 (x \mp b)^2$ with $\omega_\mathrm{local} = \sqrt{8V_b}/b$, which suggests energy levels close to $(n + \tfrac12)\,\omega_\mathrm{local}$ in each well.
+which has minima at $x = \pm b$ and a central barrier of height $V_b$ at $x = 0$, as in [](#fig-qm1-double-well).
 
 :::{figure} ../../figures/assignments/double-well-dark.svg
 :name: fig-qm1-double-well-dark
 :class: hidden dark:block
+:enumerator: QM3.1
 The double well for $V_b = 5$ and $b = 1$.
 :::
 
@@ -104,53 +48,128 @@ The double well for $V_b = 5$ and $b = 1$.
 The double well for $V_b = 5$ and $b = 1$.
 :::
 
-- For $V_b = 5$ and $b = 1$, use your Hamiltonian from Part 2 to find the four lowest energies and wavefunctions.
-  Plot them, offset by their energies, together with the potential, and check whether the two lowest energies lie below the barrier.
-- Calculate the splitting $\Delta E = E_1 - E_0$ for $V_b = 3$, $5$ and $8$ at $b = 1$, and for $b = 0.8$, $1$ and $1.2$ at $V_b = 5$.
-- For the case with the smallest splitting, refine the grid and compare the change in $\Delta E$ with $\Delta E$ itself.
+Both potentials are real and symmetric, $V(-x) = V(x)$.
+As a result, every stationary state can be chosen to be a real function that is either even, $\psi(-x) = \psi(x)$, or odd, $\psi(-x) = -\psi(x)$.
+
+## Part 1: Stationary states by shooting
+
+For the harmonic oscillator, the two lowest states are known exactly:
+
+$$
+E_0 = \tfrac12, \quad \psi_0(x) = \pi^{-1/4} e^{-x^2/2}, \qquad
+E_1 = \tfrac32, \quad \psi_1(x) = \sqrt2\,x\,\psi_0(x).
+$$
+
+They are your reference for Parts 1 and 2.
+
+The stationary equation for the oscillator can be written as
+
+$$
+\psi'' = (x^2 - 2E)\,\psi ,
+$$
+
+a second-order ODE that can be integrated from $x = 0$ outwards for any trial energy $E$; by symmetry, $x \geq 0$ is enough.
+An even state has $\psi'(0) = 0$, and an odd state has $\psi(0) = 0$.
+The other starting value only sets the overall scale, because the equation is linear, so take $\psi(0) = 1$ for an even state and $\psi'(0) = 1$ for an odd one, and normalise afterwards.
+
+Far from the centre, where $x^2 > 2E$, the equation has two kinds of solution: one that grows roughly like $e^{+x^2/2}$ and one that decays like $e^{-x^2/2}$.
+A solution started at $x = 0$ is in general a mixture of the two, and the growing part dominates at large $x$, so $\psi$ blows up.
+Only when $E$ is exactly an energy level does the growing part vanish, leaving a normalisable state.
+As $E$ passes through a level, the coefficient of the growing part changes sign, and so does the *shooting function*
+
+$$
+F(E) = \psi_E(L) ,
+$$
+
+the value of the trial solution at the end of the interval.
+Each energy level is therefore a root of $F$, which you can find with bisection: this is the *shooting method* of [](#ordinary-differential-equations-2_page).
+
+:::{exercise}
+:label: ex-qm1-shooting
+
+1. Write the oscillator equation as two first-order ODEs for $\psi$ and $\psi'$.
+2. Integrate the even case from $x = 0$ to $x = L = 5$ with your RK4 implementation, with step $0.02$, for the trial energies $E = 0.3$, $0.5$ and $0.7$, and plot the three solutions.
+3. Find the even ground state and the odd first excited state by applying your bisection from [](#root-finding_page) to $F(E)$, with brackets around the exact energies.
+4. Extend each solution to $x < 0$ using its parity, normalise it with a numerical integral over $[-L, L]$, and plot it together with the exact wavefunction.
+5. Tabulate your two energies, the width of the final bisection bracket, and the difference from the exact energy.
+6. Explain, using the nodes of your three trial solutions, why $F(E)$ has opposite signs just below and just above $E_0$.
+   Explain why a very narrow final bisection bracket alone does not mean that your energy is accurate.
+:::
+
+## Part 2: The Hamiltonian as a matrix
+
+Now solve the same problem in a completely different way.
+Represent $\psi$ by its values $\psi_i$ on a uniform grid of $N$ points on $[-L, L]$, with spacing $h = 2L/(N - 1)$, and set $\psi = 0$ at both ends, so that only the $N - 2$ interior values are unknown.
+With the second-derivative formula of [](#numerical-differentiation_page),
+
+$$
+(\hat H \psi)_i \approx -\frac{\psi_{i+1} - 2\psi_i + \psi_{i-1}}{2h^2} + V(x_i)\,\psi_i ,
+$$
+
+the Schrödinger equation becomes a matrix eigenvalue problem $H\vec\psi = E\vec\psi$, which you can solve with the tools of [](#linear-algebra_page).
+$H$ is a real symmetric matrix, so its eigenvectors are real, like the stationary states they represent; their overall sign is arbitrary.
+An eigenvector $u$ comes out with $\sum_i u_i^2 = 1$, and the wavefunction $\psi_i = u_i/\sqrt{h}$ then satisfies $\int \psi^2\,dx \approx h\sum_i \psi_i^2 = 1$.
+
+:::{exercise}
+:label: ex-qm1-matrix
+
+1. Write down the diagonal and off-diagonal elements of $H$, and the first and last rows, where the zero end values enter.
+2. Build $H$ for the oscillator with $L = 5$ and $N = 501$, and compute its three lowest eigenvalues and eigenvectors, for example with `scipy.linalg.eigh`.
+3. Normalise each eigenvector as a wavefunction, restore the zero end values, and plot the three wavefunctions.
+4. Tabulate the three lowest energies next to the exact $E_n = n + \tfrac12$ and, for the two lowest, your shooting results.
+5. Explain whether the two methods agree with each other and with the exact energies, and what limits the accuracy of each.
+:::
+
+## Part 3: Two wells and a small splitting
+
+Near each of its minima, the double well looks like a harmonic oscillator with some local frequency $\omega_\mathrm{local}$.
+Each well on its own would then have energy levels close to $(n + \tfrac12)\,\omega_\mathrm{local}$.
 
 :::{exercise}
 :label: ex-qm1-pair
 
-Which states are even and which odd?
-How does the local harmonic approximation explain why the two lowest energies lie close together, and why are they not exactly equal?
+1. Show, by expanding $V$ to second order around $x = b$, that $V \approx \tfrac12\,\omega_\mathrm{local}^2\,(x - b)^2$ with $\omega_\mathrm{local} = \sqrt{8V_b}/b$.
+2. Compute the four lowest energies and wavefunctions for $V_b = 5$ and $b = 1$ with your Hamiltonian from Part 2.
+3. Plot the four wavefunctions, offset by their energies, together with the potential, and identify each as even or odd.
+4. Verify that the two lowest energies lie below the barrier, and compare them with $\tfrac12\,\omega_\mathrm{local}$.
+5. Explain how the local harmonic approximation accounts for the two lowest energies lying close together, and why they are not exactly equal.
 :::
 
 :::{exercise}
 :label: ex-qm1-splitting
 
-How does the splitting change when the barrier gets higher, and when the wells move apart?
-Relate your answer to what the wavefunctions do inside the barrier.
-Is your smallest splitting resolved by your grid?
+1. Compute the splitting $\Delta E = E_1 - E_0$ for $V_b = 3$, $5$ and $8$ at $b = 1$, and for $b = 0.8$, $1$ and $1.2$ at $V_b = 5$.
+2. Repeat the case with the smallest splitting on a finer grid, $N = 1001$, and compare the change in $\Delta E$ with $\Delta E$ itself.
+3. Explain how the splitting changes when the barrier gets higher and when the wells move apart, and relate this to what the wavefunctions do inside the barrier.
+   State whether your smallest splitting is resolved by your grid.
 :::
 
 ## Part 4: Tunnelling in time
 
 Each stationary state has a time-independent probability density, but a combination of two of them does not.
-For $V_b = 5$ and $b = 1$, with $\phi_0$ and $\phi_1$ the two lowest states,
+For $V_b = 5$ and $b = 1$, with $\phi_0$ and $\phi_1$ the two lowest states from Part 3, consider
 
 $$
-\psi(x, t) = \frac{1}{\sqrt2}\left[\phi_0(x)\,e^{-iE_0 t} + \phi_1(x)\,e^{-iE_1 t}\right]
+\psi(x, t) = \frac{1}{\sqrt2}\left[\phi_0(x)\,e^{-iE_0 t} + \phi_1(x)\,e^{-iE_1 t}\right] .
 $$
 
-solves the time-dependent Schrödinger equation exactly, so you need no new numerical method here.
-
-- Form $\psi(x, 0)$ and check which well holds most of its probability; if necessary, flip the sign of $\phi_1$ so that the particle starts mostly in the left well.
-- Compute the probability to be in the left well, $P_L(t) = \int_{-L}^{0} |\psi|^2\,dx$, and in the right well, $P_R(t)$, over a little more than the period $2\pi/\Delta E$, and plot a few snapshots of $|\psi(x,t)|^2$.
-- Find the time of the first minimum of $P_L$ and compare it with the prediction $t_\mathrm{transfer} = \pi/\Delta E$; check that $P_L + P_R = 1$ throughout.
+In our units the time-dependent Schrödinger equation is $i\,\partial\psi/\partial t = \hat H\psi$.
+The probability to find the particle in the left well is $P_L(t) = \int_{-L}^{0} |\psi(x, t)|^2\,dx$, and $P_R(t)$ is the same integral over the right half.
 
 :::{exercise}
 :label: ex-qm1-dynamics
 
-Why can two stationary states combine into a state whose density moves?
-How well localised is your initial state, and do your snapshots and $P_L(t)$ show the predicted transfer and return?
-Using Part 3, predict without further calculation how much longer the transfer would take for $V_b = 8$.
+1. Show that $\psi(x, t)$ solves the time-dependent Schrödinger equation, and that its density is $|\psi|^2 = \tfrac12\left[\phi_0^2 + \phi_1^2 + 2\phi_0\phi_1\cos(\Delta E\,t)\right]$.
+2. Form $\psi(x, 0)$, flipping the sign of $\phi_1$ if necessary so that the particle starts mostly in the left well, and compute $P_L(0)$.
+3. Compute $P_L(t)$ and $P_R(t)$ over a little more than one period $2\pi/\Delta E$, verify that $P_L + P_R = 1$ throughout, and plot $|\psi(x, t)|^2$ at a few times.
+4. Find the time of the first minimum of $P_L$, and compare it with the prediction $t_\mathrm{transfer} = \pi/\Delta E$.
+5. Explain why $P_L(0)$ is not exactly 1, and whether your snapshots and $P_L(t)$ show the predicted transfer and return.
+   Predict, using Part 3 and without further calculation, how much longer the transfer would take for $V_b = 8$.
 :::
 
 ## Part 5: Open question
 
-Use your Hamiltonian to investigate one other one-dimensional system of your own choosing.
-State your question and a prediction before calculating, compare a small set of parameter values with a reference system, and include one check of the numerical reliability of your conclusion.
+Use your Hamiltonian to investigate one other one-dimensional system of your own choosing, and compare it with a reference system such as the symmetric double well.
 Some possible directions:
 
 - **An asymmetric double well.**
@@ -165,8 +184,11 @@ Some possible directions:
 :::{exercise}
 :label: ex-qm1-open
 
-What did you investigate, and what did you predict?
-How do your energies and wavefunctions support or challenge the prediction, and which numerical check supports your conclusion?
+1. Write down your potential, your question and your prediction before you calculate.
+2. Compute the lowest energies and wavefunctions for a small set of parameter values, and for your reference system.
+3. Plot the spectrum against your parameter, and the wavefunctions at representative values.
+4. Include one check, with a larger interval or a finer grid, that supports your conclusion.
+5. Explain whether your energies and wavefunctions support your prediction.
 :::
 
 ## What to hand in

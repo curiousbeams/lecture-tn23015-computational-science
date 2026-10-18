@@ -36,8 +36,8 @@ Every assignment has four core parts and ends with one open question.
 The first part usually builds the functions that the rest of the assignment reuses, so it is worth doing together as a group.
 After that, many teams find it works well to divide the middle parts between them and come back together for the open question.
 How you divide the work is up to you, and the natural split differs from one assignment to the next.
-Each part ends with numbered exercises.
-Answer these in your report, supported by your own figures and numbers.
+Each part is set out as numbered exercises, which end by asking you to explain what you found.
+Your report presents their results and answers their questions, supported by your own figures and numbers.
 
 There's also an open question at the end.
 The handout suggests a few directions, but you may also propose your own.
