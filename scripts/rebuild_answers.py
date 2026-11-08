@@ -99,6 +99,34 @@ def _encode(arr: np.ndarray, is_complex: bool):
     }
 
 
+# Reference values that are wrong in the TN2513 source, corrected here so that a rebuild does not
+# quietly bring the error back. Each is multiplied by -1.
+#
+#   answer_13_5b_1  PDE I charge density. The source computed rho = +laplacian(phi), but with the
+#                   update phi = (neighbours + rho)/4 the charge is rho = -laplacian(phi), so its
+#                   point source came out as -1. Fixed 2026-11-08 after a TA's review, together with
+#                   the chapter's equations and `sol_13_09`. The chapter header carries its own
+#                   copy of the bank, which was patched to match; a rebuild does not touch it.
+NEGATE = {"answer_13_5b_1"}
+
+
+def _ft2_diffraction_pattern():
+    """FT II, Exercise 6.6: |fftshift(fft2(M))|^2 of the r < 50 nm aperture, as in `sol_8_07`.
+
+    The TN2513 source stores the exercise's other three answers but not this 2001 x 2001 array,
+    so its check skipped the one thing the exercise asks for. Computed here from the same grid as
+    the chapter's `demo_04` (x and y from -1000 to 1000 nm in 1 nm steps).
+    """
+    x = np.linspace(-1000, 1000, 2001)
+    X, Y = np.meshgrid(x, x)
+    M = np.sqrt(X**2 + Y**2) < 50
+    return np.abs(np.fft.fftshift(np.fft.fft2(M))) ** 2
+
+
+# Reference values the source never had, computed from the reference solution. Added 2026-11-08.
+GENERATED = {"answer_8_2c_1": _ft2_diffraction_pattern}
+
+
 def rebuild(chapter: str) -> dict:
     src = source_json(chapter)
     if src is None:
@@ -111,13 +139,18 @@ def rebuild(chapter: str) -> dict:
     downsampled = 0
     missing = []
     for key in sorted(wanted):
-        if key not in raw:
+        if key in GENERATED and key not in raw:
+            arr, is_cx = GENERATED[key](), False
+        elif key not in raw:
             missing.append(key)
             continue
-        arr, is_cx = _as_array(raw[key])
+        else:
+            arr, is_cx = _as_array(raw[key])
         if arr is None:
             kept[key] = raw[key]
             continue
+        if key in NEGATE:
+            arr = np.where(arr == 0, 0.0, -arr)      # no -0.0 in the output
         enc = _encode(arr, is_cx)
         if isinstance(enc, dict) and enc.get("__downsampled__"):
             downsampled += 1

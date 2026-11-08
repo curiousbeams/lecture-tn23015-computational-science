@@ -17,7 +17,7 @@ def head_12_01():
         r"""
         ## Exercise 9.1
 
-        Consider the case in which the mass is at rest and is at position $x=0$ at $t=0$, and a driving force at frequency $w = w_0$.
+        Consider the case in which the mass is at rest and is at position $x=0$ at $t=0$, and a driving force at frequency $\omega = \omega_0$.
         Use the `solve_ivp()` routine to calculate $x(t)$ for $t$ from 0 to 200 seconds with 1000 points.
         Make a plot of your solution and discuss if it behaves in the way that you would expect.
         """
@@ -185,7 +185,7 @@ def head_12_03():
         r"""
         ## Exercise 9.3
 
-        Calculate the power spectrum of the second half of the calculated DDHO response trace calculated in 1(a).
+        Calculate the power spectrum of the second half of the DDHO response trace calculated in Exercise 9.1.
         Make a plot of the power spectrum with a logarithmic scale on the y-axis, and find the frequency in the data corresponding to the highest spectral power. 
 
         In your power spectrum, keep only the part of the spectrum at positive frequencies.
@@ -280,9 +280,9 @@ def head_12_04():
         r"""
         ## Exercise 9.4
 
-        Perform the calculation from Exercise 9.1, part (a), with an initial condition $x(0) = 30$.
+        Perform the calculation from Exercise 9.1 with an initial condition $x(0) = 30$.
         Make a plot of $x(t)$.
-        Write a function `find_ss_amp(x)` to find the steady state amplitude as we did above in 1(b) by finding the peak value of the last peak.
+        Write a function `find_ss_amp(x)` to find the steady state amplitude as we did in Exercise 9.2 by finding the peak value of the last peak.
         Use this function to find the steady state amplitude and show that this is the same (or at least close) to the value for $x(0) = 0$.
         """
     )
@@ -343,11 +343,9 @@ def sol_12_04():
 
 @app.cell
 def demo_01():
-    # Do not edit or remove the boiler-plate code below.
-    if given(x_2):
-        x_2.shape
-
-    show(x=x_2)
+    # Notebook code
+    _x = np.array(range(10))
+    show(_x.shape)
 
 
 @app.cell(hide_code=True)
@@ -358,7 +356,7 @@ def head_12_05():
 
         Consider a ball with mass $m = 0.1$ kg thrown upwards into the air with an initial velocity of 1 m/s.
         Use `solve_ivp()` to calculate how long it takes for the ball to reach the ground again.
-        Assume that the $g = 9.81$ m/s$^2$.
+        Assume that $g = 9.81$ m/s$^2$.
         For the numerical integration, you need to pick a time endpoint that will be longer than the time it will take for the ball to come back down.
         A time limit of 100 seconds should probably be fine.
         """
@@ -523,7 +521,7 @@ def head_12_07():
         F_f = - \frac{Cv^3}{|v|}
         $$
 
-        Repeat question 2(a) but now including air resistance in your calculation.
+        Repeat Exercise 9.5 but now including air resistance in your calculation.
 
         Before you start: do you think it will take less time or more time for the ball to fall for the same velocity? 
 
@@ -750,9 +748,9 @@ def head_12_10():
         r"""
         ## Exercise 9.10
 
-        Including air resistance, does the ball spend more time on the upwards trajectory, on the downward tragectory, or does it spend the same amount of time going up as it does going down?
+        Including air resistance, does the ball spend more time on the upwards trajectory, on the downward trajectory, or does it spend the same amount of time going up as it does going down?
 
-        Use the `solve_ivp()` routine to calculate the time going up and the time going down for the initial velocity you found in 2(e). 
+        Use the `solve_ivp()` routine to calculate the time going up and the time going down for the initial velocity you found in Exercise 9.9. 
 
         _Hint:_ an easy way to do this is to create an additional `terminal = False` event function that checks when the velocity crosses zero!
         """

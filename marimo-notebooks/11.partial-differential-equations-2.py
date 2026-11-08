@@ -17,12 +17,12 @@ def head_14_01():
         r"""
         ## Exercise 11.1
 
-        A steel block that is 1 cm thick has an initial temperture of 20 degrees Celcius.
+        A steel block that is 1 cm thick has an initial temperature of 20 degrees Celsius.
         At time $t=0$, it is sandwiched between a cold bath at a temperature of 0 degrees at $x = 1$ cm, and a hot bath at a temperature of 50 degrees at $x = 0$.
         Calculate the time dependence of the temperature profile inside the steel block. 
 
         The thermal diffusivity D for steel is $4.25 \times 10^{-6}$ m$^2$/s.
-        Perform your computation for a grid of points in spacial coodinate $x$ that runs from 0 to 1 cm with a total of `Nx` = 100 point in space.
+        Perform your computation for a grid of points in spatial coordinate $x$ that runs from 0 to 1 cm with a total of `Nx` = 100 points in space.
         Calculate the profile for times from $t=0$ to $t=2$ seconds with `Nt` = 10$^4$ points in time.
         """
     )
@@ -175,8 +175,8 @@ def head_14_02():
         Fill in the code below to solve the wave equation for a vibrating string using the FTCS method.
         Take $c = 1$ m/s and consider a string of length $L$. For your $x$ coordinate, use a grid with `Nx` = 100 points. 
 
-        For you $t$ coordinate, run your simulation for 1.2 seconds with 550 points in your time array.
-        Consider an initial displacement $x(x,t=0) = \sin(\pi x/L)$ and an initial velocity $v(x,t=0) = 0$.
+        For your $t$ coordinate, run your simulation for 1.2 seconds with 550 points in your time array.
+        Consider an initial displacement $u(x,t=0) = \sin(\pi x/L)$ and an initial velocity $v(x,t=0) = 0$.
         """
     )
 
@@ -218,7 +218,7 @@ def ex_14_02():
         u[0,:] = np.sin(np.pi*x_2/L_2)
         v[0,:] = 0
 
-        # Make sure the boundary conditions are inforced
+        # Make sure the boundary conditions are enforced
         u[:,[0,-1]] = 0
         v[:,[0,-1]] = 0
 
@@ -271,7 +271,7 @@ def sol_14_02():
     u_sol2[0,:] = np.sin(np.pi*x_sol2/L_sol2)
     v_sol2[0,:] = 0
 
-    # Make sure the boundary conditions are inforced
+    # Make sure the boundary conditions are enforced
     u_sol2[:,[0,-1]] = 0
     v_sol2[:,[0,-1]] = 0
 
@@ -424,7 +424,7 @@ def sol_14_03():
     k_sol3 = np.array(range(len(uk0_sol3)))+1
     w_sol3 = np.pi * c_sol3 * k_sol3 / L_sol3
     def calc_u_sol3(t):
-        uk = uk0_sol3*np.cos(w_sol3*t) + vk0_sol3*np.sin(w_sol3*t)
+        uk = uk0_sol3*np.cos(w_sol3*t) + vk0_sol3/w_sol3*np.sin(w_sol3*t)
         return my_idst(uk)
 
     uk0_sol3 = uk0_sol3.copy()
@@ -476,10 +476,10 @@ def demo_08():
     uk0_2 = my_dst(u0_2)
     vk0_2 = my_dst(v0_2)
 
-    # `calc_u` above is tied to the initial condition of exercise 3, and marimo gives each cell its
-    # own `uk0`, so this initial condition needs its own version of the same one-liner.
+    # `calc_u` above is tied to the initial condition of Exercise 11.3, and marimo gives each cell
+    # its own `uk0`, so this initial condition needs its own version of the same one-liner.
     def calc_u_2(t):
-        return my_idst(uk0_2*np.cos(w*t) + vk0_2*np.sin(w*t))
+        return my_idst(uk0_2*np.cos(w*t) + vk0_2/w*np.sin(w*t))
 
     show(u0=u0_2)
 

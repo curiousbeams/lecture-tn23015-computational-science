@@ -155,7 +155,9 @@ Store each particle's concentration history, so that you can look up the value o
 1. Run the simulation for $\chi = 0$, $2$ and $4$.
 2. Plot a few trajectories, the mean position $\langle q(\tau) \rangle$, and the mean concentration $\langle c(\tau) \rangle$, for each $\chi$.
 3. Plot histograms of the positions at a few late times.
-4. Compute the late-time mean position, averaged over $60 \leq \tau \leq 80$, for each $\chi$, with its standard error.
+4. Compute the late-time mean position for each $\chi$, with its standard error.
+   First average each particle's position over $60 \leq \tau \leq 80$, then take the mean and the standard error of these $N$ particle averages.
+   Positions of one particle at nearby times are strongly correlated, so treating every time point as an independent measurement would underestimate the uncertainty.
 5. Repeat the $\chi = 4$ run once with a different seed and once with $\Delta\tau = 0.01$ (keeping $\tau_m = 1$), and compare the change in its late-time mean position with the difference between $\chi = 4$ and $\chi = 0$.
 6. Explain how the ensemble can move towards the food when no particle ever chooses the direction of the food, and which of swimming speed, direction after a tumble and run duration the sensing rule changes.
    Explain why the mean position levels off instead of growing forever, and how your checks show that the effect is not a lucky random outcome or a timestep artefact.

@@ -51,7 +51,7 @@ def head_9_01():
         Note that you can generate the uniformly distributed random numbers in two ways: from the `uniform()` function and from the standard `rand()` function (with uniform distribution between 0 and 1).
         The latter has to be shifted and scaled to match the interval $a, b$.
         Try them both!
-        Also note that you can use numpy functions for computing the mean and variance
+        Also note that you can use numpy functions for computing the mean and variance.
         """
     )
 
@@ -117,9 +117,9 @@ def head_9_02():
         Create a Gaussian distributed random variable with mean $\mu=10$ and standard deviation of $\sigma=7$ and take $N=100$ samples from it, as an array.
         * Determine the mean of the generated samples and store this to variable `meanxn`
         * Determine the variance and store this to variable `varxn` (in this case the biased variance with $N$ in the denominator)
-        * Check that the mean and variance numbers match the theoretical values , increase $N$ to see convergence to the theoretical values. 
+        * Check that the mean and variance numbers match the theoretical values, increase $N$ to see convergence to the theoretical values. 
 
-        Note that you can generate the Gaussian distributed random numbers with mean $\mu$ and variance $\sigma^2$ in two ways: from the `normal()` function and from the standard normal distribution`randn()` function (with zero mean and variance 1).
+        Note that you can generate the Gaussian distributed random numbers with mean $\mu$ and variance $\sigma^2$ in two ways: from the `normal()` function and from the standard normal distribution `randn()` function (with zero mean and variance 1).
         The latter has to be shifted and scaled to match the arbitrary Gaussian.
         Try them both!
         """
@@ -449,7 +449,7 @@ def head_9_06():
         Now we make it a bit more difficult by adjusting the code.
         Consider a density that is a linear function of the radius according to $\rho(r)=\rho_0 r$.<br>
 
-        Calculate the mass of the sphere for the case of the linear increasing density using the methodology developed in Exercise 7.6 and the same parameters.
+        Calculate the mass of the sphere for the case of the linearly increasing density using the methodology developed in Exercise 7.6 and the same parameters.
         Store your calculated mass for $N=100$ as variable `mspherelin`.
         With some effort we can calculate the analytical answer as 1.5$\pi$, however, as you can see the Monte Carlo integration is a lot easier to implement.
         Increase $N$ to see whether your answer gets close to the analytical answer.
@@ -481,7 +481,7 @@ def sol_9_06():
     # Use seed to fix random number generation
     np.random.seed(0)
 
-    # Defnition of parameters
+    # Definition of parameters
     R_sol7=1        # radius of the sphere in m
     rho0_sol7=1.5    # density of the sphere in kg/m^3
     V_sol7=(2*R_sol7)**3 # reference volume of the volume enclosed by the sphere

@@ -124,9 +124,8 @@ project:
     - file: 09.ordinary-differential-equations-2.md
     - file: 10.partial-differential-equations-1.md
     - file: 11.partial-differential-equations-2.md
-    - title: Computational Assignments
+    - file: assignments/computational-assignments.md
       children:
-        - file: assignments/computational-assignments.md
         - title: Quantum Mechanics
           children:
             - file: assignments/quantum-mechanics/quantum-domains.md
@@ -134,7 +133,7 @@ project:
             - file: assignments/quantum-mechanics/tunnelling.md
             - file: assignments/quantum-mechanics/scattering.md
             - file: assignments/quantum-mechanics/slit-interference.md
-
+              hidden: true
         - title: Statistical Physics
           children:
             - file: assignments/statistical-physics/lennard-jones.md
@@ -142,6 +141,8 @@ project:
             - file: assignments/statistical-physics/brownian-motion.md
             - file: assignments/statistical-physics/chemotaxis.md
             - file: assignments/statistical-physics/ion-channels.md
+              hidden: true
+          hidden: true
 
 site:
   template: book-theme

@@ -22,8 +22,7 @@ $$
 -\nabla^2 \psi = \epsilon\,\psi ,
 $$
 
-where $\epsilon$ is the dimensionless energy.
-The disk has radius 1.
+where $\epsilon$ is the dimensionless energy and the disk has radius 1.
 An annulus also has an inner wall of radius $\rho$, leaving a ring of width $w = 1 - \rho$.
 Moving the centre of the inner circle by $\delta$ along $x$ gives an eccentric annulus; keep $|\delta| + \rho < 1$, so that the hole stays inside the disk.
 [](#fig-qm4-domains) shows the three regions.
@@ -85,8 +84,7 @@ $$
 \epsilon_{\ell,n} = j_{|\ell|,n}^2 , \qquad R_{\ell,n}(r) = A\,J_{|\ell|}\!\left(j_{|\ell|,n}\,r\right) .
 $$
 
-The constant $A$ follows from the normalisation $\int_0^1 |R|^2\, r\,dr = 1$.
-The factor $r$ comes from the area element $r\,dr\,d\phi$; the angular factor is already normalised.
+The constant $A$ follows from the normalisation $\int_0^1 |R|^2\, r\,dr = 1$, and the factor $r$ comes from the area element $r\,dr\,d\phi$ since the angular factor is already normalised.
 
 :::{exercise}
 :label: ex-qm4-disk
@@ -152,7 +150,7 @@ The size of $D_\ell$ varies a lot with $k$, but only its sign matters: evaluate 
 A grid that is too coarse can step over two nearby roots and miss both, so check the roots you found against your plot.
 :::
 
-:::{exercise}
+:::{exercise} Optional
 :label: ex-qm4-width
 
 1. Compute the energies of the four levels $(|\ell|, n) = (0, 1)$, $(1, 1)$, $(2, 1)$ and $(0, 2)$ for holes of radius $\rho = 0.25$, $0.35$ and $0.45$.
@@ -186,6 +184,7 @@ Each level with $|\ell| \geq 1$ is a pair of states, $+\ell$ and $-\ell$, so the
 2. Verify that each matrix is symmetric.
 3. Compute the ten lowest eigenvalues and eigenvectors of each matrix, for example with `scipy.linalg.eigh(H, subset_by_index=[0, 9])`, and verify that the states are normalised.
 4. Tabulate the five lowest eigenvalues of each shape on both grids next to the values from Parts 1 and 2, with their relative errors.
+   As a guide, on the $N = 61$ grid the ground-state energy should agree with the exact value to about 2% for the disk and about 6% for the annulus.
 5. Explain how the energies change as the grid is refined, and why the error is larger for the annulus than for the disk.
    Explain why refining the grid does not remove the error from a curved wall built out of square cells as quickly as you might expect.
 :::
@@ -226,7 +225,7 @@ The ground state's mean position on the grid is $\langle x \rangle = \sum x\,|\p
 3. Plot the signed wavefunctions of those two levels at $\delta = 0.20$, and classify each as even or odd under $y \to -y$.
 4. Repeat the $\delta = 0.20$ calculation on the $N = 41$ grid, and compare its splitting and $\langle x \rangle$ with $N = 61$.
 5. Explain where the ground-state probability concentrates, and why.
-   Explain why moving the hole splits the degenerate pair while changing the width did not, and state what would change, and what would stay the same, if the hole moved to the other side.
+   Explain why moving the hole splits the degenerate pair while opening the concentric hole did not, and state what would change, and what would stay the same, if the hole moved to the other side.
    Identify which features of your results could come from the grid.
 :::
 

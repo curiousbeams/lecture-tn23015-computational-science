@@ -20,8 +20,8 @@ def head_6_01():
         Write a script for calculating the angle between two vectors in degrees.
         Start with vectors `a` and `b` as input and then find the angle.
         Evaluation of the angle must be done with a single line.
-        Note that numpy does not care about the dimensions (column or row) as calculates the inner product for arrays.
-        Howeve, take care that the script does not crash in case of faulty input (two vectors of different length for example).
+        Note that numpy does not care about the dimensions (column or row) when it calculates the inner product of 1D arrays.
+        However, take care that the script does not crash in case of faulty input (two vectors of different length for example).
         Output the angle to variable `theta`.
         Test your code with vectors for which you already know the outcome.
         """
@@ -76,7 +76,7 @@ def head_6_02():
         Use your result obtained above to set-up the correct `A` matrix and `v` vector for your problem.
         Go through it and notice how Python efficiently uses the matrix $A$ storage and works on entire rows by slicing.
 
-        NB: make sure to set up the matrix $A$ such that the solution is on the form `x = [V1, V2, V3, V4]`.
+        NB: make sure to set up the matrix $A$ such that the solution is in the form `x = [V1, V2, V3, V4]`.
         Also for the Gaussian elimination code to work (with the in-place division `A[m,:] /= div`) setup both $A$ and $v$ containing floats using the `dtype` argument of the numpy array function (or by entering your matrix using floating point numbers like 4.0 instead of 4, which would make it an `int` by default).
         """
     )
@@ -108,7 +108,7 @@ def ex_6_02():
                 mult = A[_i,_m]
                 A[_i,:] -= mult*A[_m,:]
                 v[_i] -= mult*v[_m]
-        print('The matrix after Gaussian elimiation is')
+        print('The matrix after Gaussian elimination is')
         print(A)
 
         # Backsubstitution
@@ -150,7 +150,7 @@ def sol_6_02():
             mult_sol2 = A_sol2[_i,_m]
             A_sol2[_i,:] -= mult_sol2*A_sol2[_m,:]
             v_sol2[_i] -= mult_sol2*v_sol2[_m]
-    print('The matrix after Gaussian elimiation is')
+    print('The matrix after Gaussian elimination is')
     print(A_sol2)
 
     # Backsubstitution
@@ -226,7 +226,7 @@ def head_6_03b():
         r"""
         ## Exercise 4.4
 
-        Now see what happens if you lower the rank of the matrix by making last two rows identical.
+        Now see what happens if you lower the rank of the matrix by making the last two rows identical.
         Print the matrix rank, matrix determinant to the command line.
         Can you calculate the inverse?
         And what if the rows are copies of each other differing only by a small number close to the machine precision, say 1e-16 or 1e-17.
@@ -272,12 +272,12 @@ def head_6_04():
         Perform the following steps
         * Generate random  matrices  $A$  of  size  $N\times N$ and random  (column) vectors $b$ of size $N\times 1$ using the `rand` command from the numpy random library. 
         * Compute the solution $x$ to $Ax = b$ using the `inv` method and the `solve` method
-        * Compute the time it takes for the computer to finish the calculation for both methods and store the calculation time. Look up lecture 2c for timing the computation time.
+        * Compute the time it takes for the computer to finish the calculation for both methods and store the calculation time. You can time a calculation by calling `time()` before and after it and taking the difference.
         * Make a loop over a range of values for $N$, perform the calculation for every matrix size $N$ and store the computation times in an array. Take a range of values for $N$ between 100 and 1000 in ten steps on a logarithmic scale (e.g. use `np.geomspace` and round off to integer value).
         * Make a plot of both calculation times as a function of $N$. Use a double logarithmic plot with the command `loglog` and `_ax.grid(which='minor')`.  
         * Finally, formulate a hypothesis for the dependence of computational time on $N$, i.e. propose a formula for this dependence. Read from the graph, by what factor is `solve` faster than `inv`.
 
-        In a log-log plot a dependence of $t \propto N^{p}$ corresponds to a linear line log $t=p $log $N$. Hence, the slope of the linear dependence is the exponent $p$. To determine power $p$ divide the number of units on the vertical scale with the number of units on the horizontal scale.
+        In a log-log plot a dependence of $t \propto N^{p}$ corresponds to a straight line, $\log t = p \log N + \text{const}$. Hence, the slope of the linear dependence is the exponent $p$. To determine power $p$ divide the number of units on the vertical scale with the number of units on the horizontal scale.
         """
     )
 
@@ -408,7 +408,7 @@ def head_6_06b():
 
         Use `np.concatenate` to add the fixed side points to the bead positions for plotting the string.<br>
 
-        Why are the eigenvectors from numpy quantitative, whereas the eigenvectors of calculated with numpy are relative $[A, B]$ and $[A, -B]$?
+        Why do the eigenvectors from numpy have definite values, whereas the eigenvectors you calculated by hand are only defined up to a factor, $[A, A]$ and $[A, -A]$?
         """
     )
 
@@ -450,7 +450,7 @@ def head_6_05b():
         r"""
         ## Exercise 4.8
 
-        Calculate an array `xt` of dimension `(100,2)` such that `x[n]` corresponds to the position at the time `t[n]` when the starting point is `x0 = [1,0]`.
+        Calculate an array `xt` of dimension `(100,2)` such that `xt[n]` corresponds to the position at the time `t[n]` when the starting point is `x0 = [1,0]`.
         Plot the position of both $x_1$ and $x_2$ as function of time in the same plot.
         """
     )

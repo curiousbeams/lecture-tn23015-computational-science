@@ -52,15 +52,15 @@ def head_13_01():
         ## Exercise 10.1
 
         Consider a square box with the left, right, and bottom sides grounded, and the top side set to a voltage of 1V.
-        In our finite element technique, we will divide the two-dimensional $x-y$ space into an $M \times M$ grid, illustrated here for $M = 11$: 
+        In our finite difference technique, we will divide the two-dimensional $x-y$ space into an $M \times M$ grid, illustrated here for $M = 11$: 
 
         ![](https://raw.githubusercontent.com/curiousbeams/lecture-tn23015-computational-science/main/figures/box.png)
 
         The outer boundary points are fixed by the boundary condition, and are not updated when we are solving for $\phi$: instead they remain at a fixed potential.
         We need to keep track of this so that we do not accidentally update any points that should correspond to a fixed external potential. 
 
-        Note that our update equation above does not depend on the spacing between our grid points: the Laplace equation has the same solution regardless if the size of the box in 1 meter of 1 nm!
-        For the Laplace equation, we do not have to keep track what the spacing between our points is.
+        Note that our update equation above does not depend on the spacing between our grid points: the Laplace equation has the same solution regardless of whether the box is 1 meter or 1 nm across!
+        For the Laplace equation, we do not have to keep track of what the spacing between our points is.
 
         Your task is to fill in the code below to use Jacobi's method to calculate $\phi(x,y)$.
 
@@ -244,7 +244,7 @@ def head_13_03():
         r"""
         ## Exercise 10.3
 
-        Perform the calculation of Exercise 10.1, part (a), with the Gauss-Seidel method.
+        Perform the calculation of Exercise 10.1 with the Gauss-Seidel method.
         """
     )
 
@@ -401,7 +401,7 @@ def head_13_05():
         r"""
         ## Exercise 10.5
 
-        Modify your code from 2(a) to implement SOR.
+        Modify your code from Exercise 10.3 to implement SOR.
         Use an SOR parameter of 1.95, which works well by trial-and-error.
         """
     )
@@ -529,7 +529,7 @@ def head_13_07():
         r"""
         ## Exercise 10.7
 
-        Peform a simulation of a 2d "point source" consisting of a single pixel at position `i,j = 50,50` with charge `rho = 1`.
+        Perform a simulation of a 2D "point source" consisting of a single pixel at position `i,j = 50,50` with charge `rho = 1`.
         (Note that our "point source" 2D simulation actually corresponds to the voltage around a thin, infinitely long wire.) Use the metallic boundary condition V=0 at the boundaries. 
 
         To match the numerical answer values of the reference solution, use SOR with an SOR parameter of 1.95.
@@ -625,7 +625,7 @@ def head_13_08():
         r"""
         ## Exercise 10.8
 
-        Implement Exercise 10.4, part (a), with an extra boundary grid point on all sides.
+        Implement Exercise 10.7 with an extra boundary grid point on all sides.
         """
     )
 
@@ -719,7 +719,7 @@ def head_13_09():
         r"""
         ## Exercise 10.9
 
-        Calculate the (dimensionless) charge density for the simulation in question 5(a).
+        Calculate the (dimensionless) charge density for the simulation of Exercise 10.8.
         """
     )
 
@@ -745,7 +745,7 @@ def sol_13_09():
     for _i in range(1,M_sol8-1):
         for _j in range(1,M_sol8-1):
             rho_calc_sol9[_i,_j] = \
-                (phi_sol9[_i+1,_j] + phi_sol9[_i-1,_j] + phi_sol9[_i,_j+1] + phi_sol9[_i,_j-1] - 4*phi_sol9[_i,_j])
+                -(phi_sol9[_i+1,_j] + phi_sol9[_i-1,_j] + phi_sol9[_i,_j+1] + phi_sol9[_i,_j-1] - 4*phi_sol9[_i,_j])
     rho_calc_sol9 = np.copy(rho_calc_sol9)
 
     show(rho_calc=rho_calc_sol9)
@@ -769,7 +769,7 @@ def demo_07():
     # Do not edit or remove the boiler-plate code below.
     fig_5 = None
     if given(rho_calc):
-        fig_5 = visualise(-rho_calc, normalisation=0.148, line_cut_y=1, autoscale=True)
+        fig_5 = visualise(rho_calc, normalisation=0.148, line_cut_y=1, autoscale=True)
         fig_5.show()
 
     show(rho_calc=rho_calc)

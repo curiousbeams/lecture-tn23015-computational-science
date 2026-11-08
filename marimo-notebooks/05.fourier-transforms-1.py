@@ -15,7 +15,7 @@ def head_7_01():
         r"""
         ## Exercise 5.1
 
-        Create a an array representing of an oscillation voltage in the form of a 1 Hz sine wave that runs for 10 seconds and is sampled at 100 Hz.
+        Create an array representing an oscillating voltage in the form of a 1 Hz sine wave that runs for 10 seconds and is sampled at 100 Hz.
         """
     )
 
@@ -25,7 +25,7 @@ def ex_7_01():
     # Fill these in as you work through the exercise.
     f0 = fs = t = y = None
 
-    # Exercise 1
+    # Exercise 5.1
 
     # The frequency in Hz
     # f0 = ___
@@ -50,7 +50,7 @@ def check_7_01():
 
 @app.cell(hide_code=True)
 def sol_7_01():
-    # Exercise 1
+    # Exercise 5.1
 
     # The frequency in Hz
     f0_sol1 = 1
@@ -88,7 +88,7 @@ def head_7_02():
 
 @app.cell
 def ex_7_02():
-    # Exercise 2
+    # Exercise 5.2
 
     # Fill this in as you work through the exercise.
     _ax = None
@@ -108,7 +108,7 @@ def ex_7_02():
 
 @app.cell(hide_code=True)
 def sol_7_02():
-    # Exercise 2
+    # Exercise 5.2
 
     # Use lines and circles to be able to see the points
     _fig, _ax = plt.subplots()
@@ -272,7 +272,7 @@ def head_7_05():
         r"""
         ## Exercise 5.5
 
-        Adjust the plot so that it zoom so you zoom in on the range from 0 to 2 Hz.
+        Adjust the plot to zoom in on the range from 0 to 2 Hz.
         Set x-ticks of your graph to a spacing of 0.1 by using the command `_ax.set_xticks(np.arange(0,2,0.1))`, and turn on the grid.
         """
     )
@@ -342,7 +342,7 @@ def head_7_06():
         r"""
         ## Exercise 5.6
 
-        Use the arrays above to create a signal that consists of a sum of 1 Hz cosine wave of amplitude 1 and a 0.5 Hz sine wave with amplitude 0.5.
+        Use the arrays above to create a signal that consists of a sum of a 1 Hz cosine wave of amplitude 1 and a 0.5 Hz sine wave with amplitude 0.5.
         Make a plot of the absolute value of the FFT.
         """
     )
@@ -353,7 +353,7 @@ def ex_7_06():
     # Fill these in as you work through the exercise.
     y_2 = yt_2 = None
 
-    # Exercise 6
+    # Exercise 5.6
 
     # y_2 = .....
     # yt_2 = .....
@@ -379,7 +379,7 @@ def check_7_06():
 
 @app.cell(hide_code=True)
 def sol_7_06():
-    # Exercise 6
+    # Exercise 5.6
 
     y_sol6 = np.cos(2*np.pi*1.0*t_sol1) + 0.5*np.sin(2*np.pi*0.5*t_sol1)
     yt_sol6 = np.fft.fft(y_sol6)
@@ -434,7 +434,7 @@ def head_7_07():
         r"""
         ## Exercise 5.7
 
-        Check that that the scaling factor we propose works and produces the same height of peak in the power spectrum for the sine wave independent of your choise of the sampling frequency or the total time trace length.
+        Check that the scaling factor we propose works and produces the same height of peak in the power spectrum for the sine wave independent of your choice of the sampling frequency or the total time trace length.
         """
     )
 
@@ -444,7 +444,7 @@ def ex_7_07():
     # Fill these in as you work through the exercise.
     f1_2 = f2_2 = power1 = power2 = t1_2 = t2_2 = y1t_2 = y2t_4 = None
 
-    # Exercise 7
+    # Exercise 5.7
 
     T1 = 10
 
@@ -487,7 +487,7 @@ def check_7_07():
 
 @app.cell(hide_code=True)
 def sol_7_07():
-    # Exercise 7
+    # Exercise 5.7
 
     T1_sol7 = 10
 
@@ -529,12 +529,12 @@ def head_7_08():
         r"""
         ## Exercise 5.8
 
-        The dataset "data.dat" for lecture 7 contains two columns.
+        The dataset "data.dat" contains two columns.
         The second column represents a measured voltage in Volts, and the first column represents the time of the measurement in seconds.
         The data points are measured at a constant sampling rate.
-        Load the dataset and make a plot voltage vs. time.
+        Load the dataset and make a plot of voltage vs. time.
 
-        note: The path to the data.dat file is: "data.dat"
+        Load it with `load_data("data.dat")`, as in [](#numerical-integration_page).
         """
     )
 
@@ -544,7 +544,7 @@ def ex_7_08():
     # Fill these in as you work through the exercise.
     _ax = data = t_2 = v = None
 
-    # Exercise 8
+    # Exercise 5.8
 
     # data = load_data(_____)
     # t_2 = data[___,___]
@@ -567,7 +567,7 @@ def check_7_08():
 
 @app.cell(hide_code=True)
 def sol_7_08():
-    # Exercise 8
+    # Exercise 5.8
 
     data_sol8 = load_data("data.dat")
     t_sol8 = data_sol8[:,0]
@@ -670,14 +670,14 @@ def head_7_10():
         r"""
         ## Exercise 5.10
 
-        : Find the frequency of the sine wave by looking for the frequency at which the peak occurs. (we would recommend just using a `for` loop for this, but there might be another way if you are clever.) Print out both the frequency of the sine wave, along with it's spectral power.
+        Find the frequency of the sine wave by looking for the frequency at which the peak occurs. (we would recommend just using a `for` loop for this, but there might be another way if you are clever.) Print out both the frequency of the sine wave, along with its spectral power.
         """
     )
 
 
 @app.cell
 def ex_7_10():
-    # Exercise 10
+    # Exercise 5.10
     # (Use `f` from the previous exercise)
 
     # Fill these in as you work through the exercise.
@@ -717,7 +717,7 @@ def check_7_10():
 
 @app.cell(hide_code=True)
 def sol_7_10():
-    # Exercise 10
+    # Exercise 5.10
 
     # The power is always bigger than zero, so this is a good starting point
     Pmax_sol10=-1
@@ -755,7 +755,7 @@ def ex_7_11():
     # Fill these in as you work through the exercise.
     _ax = A = v_sine = None
 
-    # Exercise 11
+    # Exercise 5.11
 
     # Calculate the amplitude based on the spectral power peak value
     # A = _____
@@ -786,7 +786,7 @@ def check_7_11():
 
 @app.cell(hide_code=True)
 def sol_7_11():
-    # Exercise 11
+    # Exercise 5.11
 
     # Calculate the amplitude based on the spectral power peak value
     A_sol11 = np.sqrt(2*Pmax_sol10)

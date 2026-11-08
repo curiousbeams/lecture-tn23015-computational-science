@@ -1,6 +1,5 @@
 ---
 title: Computational Assignments
-short_title: Overview
 label: assignments_page
 authors: [gvarnavides, lathouwers]
 numbering:
@@ -38,6 +37,7 @@ After that, many teams find it works well to divide the middle parts between the
 How you divide the work is up to you, and the natural split differs from one assignment to the next.
 Each part is set out as numbered exercises, which end by asking you to explain what you found.
 Your report presents their results and answers their questions, supported by your own figures and numbers.
+A few exercises and items are marked *optional*: do them if you have time, but a complete report does not need them.
 
 There's also an open question at the end.
 The handout suggests a few directions, but you may also propose your own.

@@ -202,7 +202,7 @@ def head_4_04():
         r"""
         ## Exercise 2.4
 
-        Write code to implement Simpson's rule for the same integral as Exercise 2.1, using 11 points (10 steps).
+        Write code to implement Simpson's rule for the same integral as Exercise 2.2, using 11 points (10 steps).
         """
     )
 
@@ -317,12 +317,12 @@ def head_4_06():
         If $f(t)$ is the function describing the velocity as a function of time, then the answer $g(t)$ is given by:
 
         $$
-        g(t) = \int_0^t h(\tau) d\tau
+        g(t) = \int_0^t f(\tau) d\tau
         $$
 
         Every element in your output array is then conceptually defined by computing an integral from $\tau=0$ to $\tau = t$. 
 
-        (Of course, there may be cleaver and more computationally efficient ways to do it as well, but that is not the focus right now...)
+        (Of course, there may be clever and more computationally efficient ways to do it as well, but that is not the focus right now...)
 
         _Recommendation_ "[Modularize](https://en.wikipedia.org/wiki/Modular_programming)" your code by creating a function that does the trapezoidal integration of an array, this will make your code easier to write and use.
         """
@@ -400,7 +400,7 @@ def sol_4_06():
     # There may be a numpy cumulative integral function (google would tell us quickly), but we'll
     # implement it ourselves here with a for loop.
 
-    # Note it's not obvious that range() shoud start at two, but you must remember that v[0:2] 
+    # Note it's not obvious that range() should start at two, but you must remember that v[0:2] 
     # gives an array [v[0], v[1]]
 
     for _i in range(1,N_sol6):
@@ -416,7 +416,7 @@ def head_4_07():
         r"""
         ## Exercise 2.7
 
-        Make a plot with velocity on the left-hand y-axis and distance travelled in the right-hand y-axis. 
+        Make a plot with velocity on the left-hand y-axis and distance travelled on the right-hand y-axis. 
 
         To plot data with a second y-axis, you need a bit more matplotlib code:
 

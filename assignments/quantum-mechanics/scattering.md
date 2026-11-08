@@ -164,6 +164,11 @@ Once the collision is over, $R(t)$ and $T(t)$ stop changing; we call these final
    Explain why $R_\infty + T_\infty \approx 1$ on its own is not enough to show that the ends of the domain had no influence.
 :::
 
+:::{dropdown} Hint: what to store during a run
+Storing $\psi$ at every timestep fills your memory quickly: on $[-130, 130]$ one run takes a few hundred megabytes, and more than 1 GB on the finer grid of Part 4.
+Store $\psi$ only at the times you want to plot, and compute $R(t)$, $P_\mathrm{mid}(t)$ and $T(t)$ while the run progresses, for example every few timesteps.
+:::
+
 ## Part 4: Reflection, transmission and tunnelling
 
 A packet with $E_0 < V_0$ is mostly below the barrier, but its spread of momenta means that a small part of it is not.
@@ -180,9 +185,9 @@ $$
 Keep $\sigma_x = 3$ and $x_0 = -24$, and set $k_0 = \sqrt{2E_0}$.
 
 1. Compute $T_\infty$ for $E_0/V_0 = 0.5$, $0.75$, $1$ and $1.5$, at $a = 1.6$, and plot $T_\infty$ against $E_0/V_0$.
-2. Compute $T_\infty$ for barrier widths $a = 0.8$, $1.6$ and $2.4$, at $E_0/V_0 = 0.5$, and plot $\ln T_\infty$ against $a$.
+2. *Optional:* compute $T_\infty$ for barrier widths $a = 0.8$, $1.6$ and $2.4$, at $E_0/V_0 = 0.5$, and plot $\ln T_\infty$ against $a$.
 3. Repeat the $E_0/V_0 = 0.5$, $a = 1.6$ run on a finer grid, $h = 0.05$ with $\Delta t = 0.0025$, and report the change in $T_\infty$.
-4. Explain how the incident energy and the barrier width change the transmission.
+4. Explain how the incident energy changes the transmission, and, if you did item 2, how the barrier width does.
    Identify which of your results show tunnelling, and which show reflection *above* a barrier.
 :::
 

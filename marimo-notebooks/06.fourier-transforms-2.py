@@ -76,13 +76,13 @@ def head_8_01():
         $$
         V(t) = 
         \begin{cases}
-        0 &  \text{for } 0 <t <=50 \text{ s}\\
-        1 &  \text{for } 50 <t <=100 \text{ s} \\
-        0 &  \text{for } 100 <t <=150 \text{ s}
+        0 &  \text{for } 0 <t \leq 50 \text{ s}\\
+        1 &  \text{for } 50 <t \leq 100 \text{ s} \\
+        0 &  \text{for } 100 <t \leq 150 \text{ s}
         \end{cases}
         $$
 
-        Your pulse should include 1000 points
+        Your pulse should include 1000 points.
         """
     )
 
@@ -139,11 +139,11 @@ def head_8_02():
         ## Exercise 6.2
 
         Write a function to use a FFT to apply a low-pass filter to the data.
-        You filter should have a time constant $\tau = 5$ seconds.
+        Your filter should have a time constant $\tau = 5$ seconds.
         The cell includes code to make a plot of the original data along with the filtered data. 
 
         _Note:_ When using `np.fft.ifft()`, it will return a complex-valued array even if the data has no imaginary component (as it should if you have done your filtering correctly).
-        For plotting, you will need to use `np.real()` to convert your array to real values before plotting (if you forget, matplotlib will give you a warning messgae).
+        For plotting, you will need to use `np.real()` to convert your array to real values before plotting (if you forget, matplotlib will give you a warning message).
         You should therefore have your `low_pass` function return only the real-valued part of the filtered data.
         """
     )
@@ -254,12 +254,12 @@ def head_8_04():
         r"""
         ## Exercise 6.4
 
-        We can solve the problem we saw in Exercise 6.1, part (c), by using zero-padding of the array during the Fourier transform.
+        We can solve the problem we saw in Exercise 6.3 by using zero-padding of the array during the Fourier transform.
         Read the documentation page of [`np.fft.fft`](https://numpy.org/doc/stable/reference/generated/numpy.fft.fft.html) to learn how to do this.
 
-        Write a new version of the low pass function `low_pass2()` function, this time padding this signal you are filtering with as many points as it already contains.
+        Write a new version of the low pass function, `low_pass2()`, this time padding the signal you are filtering with as many points as it already contains.
         If you do this correctly, it will eliminate the "boundary" effects from your FFT we saw above.
-        The ploting code to make a plot of your low-pass filtered data after filtering with the new function.
+        The cell includes plotting code that shows your data after filtering with the new function.
         """
     )
 
@@ -319,7 +319,7 @@ def demo_04():
     x = np.linspace(-N/2,N/2,N+1)
     y = np.linspace(-N/2,N/2,N+1)
 
-    # Upper case letters correspont to the 2D matrices containing the X or Y coordinates
+    # Upper case letters correspond to the 2D matrices containing the X or Y coordinates
     X, Y = np.meshgrid(x, y)
 
     # This we need to tell python what the range of the image plot are
@@ -431,7 +431,7 @@ def head_8_07():
         ## Exercise 6.6
 
         Now calculate and plot the diffraction pattern from your mask.
-        Plot a zoom in of the diffraction pattern around the center 200 pixels of the image.
+        Plot a zoom of the central 100 × 100 pixels of the diffraction pattern.
         Your axis labels on your diffraction pattern should correspond to wavenumbers with the appropriate units.
         (Hint: make sure to use fftshift, which also works on 2D arrays!)
         """
@@ -442,34 +442,28 @@ def head_8_07():
 def ex_8_07():
     # Fill these in as you work through the exercise.
     diffraction_pattern = end_2 = extent_zoom = k_max = k_zoom = start_2 = None
+    zoom_2 = 100  # the width of the zoom, in pixels
 
+    # First, take the FFT of the mask M and turn it into a diffraction pattern
     # diffraction_pattern = ....
-    # start_2=....
-    # end_2=....
+
+    # The zoom: the central zoom_2 pixels of the image
+    # start_2 = ....
+    # end_2 = ....
+
+    # Extents: this one we have to think about carefully!
+    # A good trick: what is the largest wave number k_max?
+    # Your full image will then run from -k_max to k_max. From this,
+    # you can work out the extents of the zoom.
     # k_max = ....
-    # k_zoom = k_max * zoom / len(x)
+    # k_zoom = k_max * zoom_2 / len(x)
     # extent_zoom = [ , , , ]
 
     # Fill in the commented lines below, but leave the rest of this block in place.
-    Mt = _ax = zoom_2 = None
+    _ax = None
     if given(diffraction_pattern, end_2, extent_zoom, k_max, k_zoom, start_2, M):
-
-        # First, we take the FFT of the mask
-        Mt = np.fft.fft2(M)
-
-        # Now translate this into a diffraction pattern
-
-        # Calculate the zoom 
-        zoom_2=100
-
-        # Extents: this one we have to think about carefully! 
-        # A good trick: what is the largest wave number k_max? 
-        # Your full image will then run from -k_max to k_max. From this,
-        # you can work out the extents 
-
-        # Now the 
         _fig, _ax = plt.subplots()
-        _im1 = _ax.imshow(diffraction_pattern, extent=exts)
+        _im1 = _ax.imshow(diffraction_pattern[start_2:end_2, start_2:end_2], extent=extent_zoom)
 
         # _ax.set_xlabel(...)
         # _ax.set_ylabel(...)
@@ -511,25 +505,19 @@ def sol_8_07():
     start_sol6 = int(len(x)/2-zoom_sol6/2)
     end_sol6 = start_sol6+zoom_sol6
 
-    # Extents: this one we have to think about carefully! 
-    # A good trick: what is the largest wave number k_max? 
-    # Your full image will then run from -k_max to k_max. From this,
-    # you can work out the extents 
-
-    # k_zoom_sol6 = k_max * zoom / len(x)
-    # extent_zoom_sol6 = [ , , , ]
+    # Extents: the largest wave number k_max is the Nyquist frequency, and the
+    # full image runs from -k_max to k_max over len(x) pixels
     k_max_sol6 = 1/(x[1]-x[0])/2 # the nyquist frequency
     k_zoom_sol6 = k_max_sol6 * zoom_sol6 / len(x)
     extent_zoom_sol6 = [ -k_zoom_sol6 , k_zoom_sol6, -k_zoom_sol6, k_zoom_sol6]
 
-    # Now the 
     _fig, _ax = plt.subplots()
-    _im1 = _ax.imshow(diffraction_pattern_sol6, extent=exts_sol5)
+    _im1 = _ax.imshow(diffraction_pattern_sol6[start_sol6:end_sol6, start_sol6:end_sol6], extent=extent_zoom_sol6)
 
     # _ax.set_xlabel(...)
     # _ax.set_ylabel(...)
     _ax.set_xlabel("k$_x$ (nm$^{-1}$)")
-    _ax.set_ylabel("k$_y$ (nm$^{-1})$")
+    _ax.set_ylabel("k$_y$ (nm$^{-1}$)")
     _fig.colorbar(_im1)
 
     diffraction_pattern_sol6 = np.copy(diffraction_pattern_sol6)

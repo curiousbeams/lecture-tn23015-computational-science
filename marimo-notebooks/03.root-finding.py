@@ -47,14 +47,14 @@ def head_5_01():
         Print the values $a$, $b$, the estimate of the root, and the error during the while loop iterations.
         Calculate and print the value for the found displacement constant. 
         Follow the steps below when making this exercise.
-        * Make a plot of the function in to get a rough idea what the interval the interval is in which the root is located.
+        * Make a plot of the function to get a rough idea of the interval in which the root is located.
         * Write a Python function for the equation for which you want to find the root
         * Test that your function definition gives the correct function value
-        * Chose your interval $[a, b]$ such that the root is inside and that the obvious solution $x$=0 is not included. Make a check in your code that there is actually a root in the interval using an ```if``` statement or otherwise give a warning.
+        * Choose your interval $[a, b]$ such that the root is inside and that the obvious solution $x$=0 is not included. Make a check in your code that there is actually a root in the interval using an ```if``` statement or otherwise give a warning.
         * Implement the bisection method to find the root
         * Print the values of $a$, $b$, $xsol$, and the error to the command line at every iteration
 
-        Save your final solution as variable `xsol` is is plotted in the same graph.
+        Save your final solution as variable `xsol`, which is then plotted in the same graph.
         This exercise is from the book Computational Physics of Newman.
         """
     )
@@ -322,7 +322,7 @@ def head_5_04():
         where $M$ and $m$ are the Earth and Moon masses, $G$ is Newton's gravitational constant, and $\omega$ is the angular velocity of both the Moon and the satellite.
 
         The equation above is a fifth-order polynomial equation in $r$ (also called a quintic equation).
-        Such equations cannot be solved in closed form (i.e. as an equation), but it's straightforward to solve them numerically.
+        Such equations cannot in general be solved in closed form (i.e. as a formula), but it's straightforward to solve them numerically.
         Write a program that uses Newton's method to solve for the distance $r$ from the Earth to the $L_1$ point.
         Compute a solution accurate to at least four significant figures.
 
@@ -342,8 +342,8 @@ def head_5_04():
 
         Some tips for making this exercise
         * Make a plot of the function and its derivative
-        * First check the values of the function and its derivative at the point where you start your search, can you see what the problem is with a straightforward implementation of the given the physical parameters?
-        * Implement Newton's method to a modified version of the equation above and find the solution _Hint: write it as standard polynomial in r_
+        * First check the values of the function and its derivative at the point where you start your search, can you see what the problem is with a straightforward implementation of the given physical parameters?
+        * Apply Newton's method to a modified version of the equation above and find the solution. _Hint: write it as a standard polynomial in r._
 
         Store your final solution for $r$ in variable `lagrange`.
         """

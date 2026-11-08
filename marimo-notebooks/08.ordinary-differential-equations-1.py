@@ -102,10 +102,10 @@ def head_11_02():
         r"""
         ## Exercise 8.2
 
-        Use the Euler method to solve for the voltage on the capacitor for the case that the input voltage is not constant for $t>0$ but instead oscillates at a frequency of 1 Hz with an amplitude of 1 Volt for $t>0$: $V(t>0)= \sin(\omega t)$.
+        Use the Euler method to solve for the voltage on the capacitor for the case that the input voltage is not constant for $t>0$ but instead oscillates at a frequency of 1 Hz with an amplitude of 1 Volt for $t>0$: the applied voltage becomes $V_0 \sin(\omega t)$, with $V_0 = 1$ V and $\omega = 2\pi \times 1$ Hz.
         The capacitor is also taken to be uncharged at $t=0$. 
 
-        Note now that your derivative is now not only a function of $V$, but now also explicitly dependent on $t$.
+        Note that your derivative is now not only a function of $V$, but now also explicitly dependent on $t$.
 
         Your calculation should produce an array for $V(t)$ for $t$ from 0 to 10 seconds with 1000 points.
         Make a plot of $V(t)$.
@@ -196,7 +196,7 @@ def head_11_03():
 
         Calculate $x(t)$ for a mass on a spring.
         Take $m = 1$ kg, $k = 1$ N/m, $x(t=0) = 0$ and $v(t=0) = 1$ m/s.
-        Your code should output an array that represent $x(t)$ for $t$ from 0 to 20*$\pi$ seconds (which should give exactly 10 oscillations) with 1000 points.
+        Your code should output an array that represents $x(t)$ for $t$ from 0 to $20\pi$ seconds (which should give exactly 10 oscillations) with 1000 points.
         Make a plot of $x(t)$.
         Does it do what you expect it should?
         """
@@ -591,7 +591,7 @@ def head_11_07():
         Use the `solve_ivp()` routine to solve the problem of the charging capacitor above from Exercise 8.1. 
 
         You will need to define a function `dVdt(t,V)`.
-        By convention, this function should take time (the independent variable) as its first argument and the voltage value as it's second.
+        By convention, this function should take time (the independent variable) as its first argument and the voltage value as its second.
         This function you will need to give as the first argument of the `solve_ivp()` function. 
 
         You will also need to pass a [tuple](https://docs.python.org/3/tutorial/datastructures.html#tuples-and-sequences) as the second argument of `solve_ivp()` to specify the start and end times.
@@ -602,7 +602,7 @@ def head_11_07():
         For this case, you can provide a list with one element: `[V0]`, where `V0` is the value $V(t=0)$.
 
         Plot your solution using points in your plot so that you can see the time steps that the routine chose for you automatically.
-        Also, plot on top of the points you get the answer you had from Exercise 8.6 in which you solve with RK4 with 1000 points.
+        Also, plot on top of the points you get the answer you had from Exercise 8.6 in which you solved it with RK4 with 1000 points.
         """
     )
 
@@ -630,7 +630,7 @@ def ex_11_07():
     # it using sol.y[0,:]
     # V_5 = ....
 
-    # A plot with the scipy answer and your answer from exercise 5 (with legend)
+    # A plot with the scipy answer and your answer from Exercise 8.5 (with legend)
     # _fig, _ax = plt.subplots()
     # _ax.plot(t,V, 'o', label=....)
     # _ax.plot(t_6, V_4, label=...)
@@ -663,7 +663,7 @@ def sol_11_07():
     # it using sol.y[0,:]
     V_sol7 = sol_sol7.y[0,:]
 
-    # A plot with the scipy answer and your answer from exercise 5 (with legend)
+    # A plot with the scipy answer and your answer from Exercise 8.5 (with legend)
     # _ax.plot(t,V, 'o', label=....)
     # _ax.plot(t_6, V_4, label=...)
     _fig, _ax = plt.subplots()
@@ -684,8 +684,8 @@ def head_11_08():
         r"""
         ## Exercise 8.8
 
-        Use the `t_eval` parameter of the `solve_ivp()` to specify which points in time for which the voltage should be calculated.
-        Use a range of 0 of 10 seconds with 1000 points.
+        Use the `t_eval` parameter of `solve_ivp()` to specify the points in time at which the voltage should be calculated.
+        Use a range from 0 to 10 seconds with 1000 points.
         Make a plot of $V(t)$, and a second plot showing the difference between your RK4 calculation in Exercise 8.6 with the values calculated by the default settings of the `solve_ivp()` routine.
         """
     )

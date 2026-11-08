@@ -41,9 +41,9 @@ Use $N_A = 100$, $N_B = 200$ and $q_\mathrm{tot} = 300$.
 1. Compute $S_\mathrm{tot}(q_A)$ for every allowed $q_A$, and plot it.
 2. Compute and plot the normalised $P(q_A)$, and find its most probable value, mean and standard deviation.
 3. Compute the temperatures $T_A(q_A)$ and $T_B(q_\mathrm{tot} - q_A)$ from your entropy values with a finite-difference method from [](#numerical-differentiation_page), and plot both against $q_A$.
-4. Find where the two temperatures are equal with a root-finding method from [](#root-finding_page), interpolating your temperatures between integer $q_A$, and compare it with the maximum of $S_\mathrm{tot}$.
+4. Compare where the two temperature curves cross with the maximum of $S_\mathrm{tot}$.
 5. Explain where the entropy is largest, and whether equilibrium means equal energies or equal energy per oscillator.
-   Explain why the most probable $q_A$, the mean $q_A$ and your equal-temperature point need not coincide exactly in a finite system.
+   Explain why the most probable $q_A$ and the mean $q_A$ need not coincide exactly in a finite system.
 :::
 
 :::{dropdown} Hint: enormous numbers
@@ -61,8 +61,7 @@ The factor $e^{-S_\mathrm{max}}$ cancels between numerator and denominator, so t
 :label: ex-sp3-temperature
 
 1. Show that along the line $q_A + q_B = q_\mathrm{tot}$, $dS_\mathrm{tot}/dq_A = 1/T_A - 1/T_B$.
-2. Repeat your equal-temperature calculation with a different finite-difference step or formula, and report how much the root moves.
-3. Explain why equal temperatures correspond to the maximum of the entropy, and what precision for the equal-temperature point the energy spacing and your derivative approximation support.
+2. Explain why equal temperatures correspond to the maximum of the entropy.
 :::
 
 ## Part 2: Energy exchange by random sampling

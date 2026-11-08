@@ -83,9 +83,9 @@ def head_3_02():
 
         Now, we will write a function to calculate the derivative numerically with a given step size $h$ and compare our numerically calculated derivative with that of the analytical answer.
 
-        Write two functions that calculates the derivative of a function numerically, one using the forward difference method, and once using the central difference method.
+        Write two functions that calculate the derivative of a function numerically, one using the forward difference method, and one using the central difference method.
 
-        Use these functions calculate $f'(x)$ at $x=1$ for $h=0.5$, and compare your numerically calculated derivatives to the correct answer from the analytical formula.
+        Use these functions to calculate $f'(x)$ at $x=1$ for $h=0.5$, and compare your numerically calculated derivatives to the correct answer from the analytical formula.
         """
     )
 
@@ -243,7 +243,7 @@ def head_3_04():
         r"""
         ## Exercise 1.4
 
-        Calculate the derivative of the function for a $x$ ranging from $-2 \leq x \leq 2$ with 100 points using the forward and the central difference methods with $h = 0.5$. 
+        Calculate the derivative of the function for $x$ ranging from $-2 \leq x \leq 2$ with 100 points using the forward and the central difference methods with $h = 0.5$. 
 
         You can make use of the functions you defined above.
 
@@ -324,15 +324,15 @@ def head_3_05():
         ## Exercise 1.5
 
         Here, you will make a plot of the error of the forward difference derivative, and also a plot of the function f(x), in two plots beside each other.
-        The idea is to try to understand the value of the error (is it large, is it small, is it positive, is it negative) base on the shape of the function.
+        The idea is to try to understand the value of the error (is it large, is it small, is it positive, is it negative) based on the shape of the function.
 
         Your x-range should extend from -2 to 2 with 100 points. 
 
         To make two plots beside each other, you will use the matplotlib subplot capabilities:
 
-        Start your subplot using the command `fig, ax = plt.subplots(figsize=(10,4))`.
-        To make your left hand plot, run the command `ax = axs[0]` then use the usual plot commands to make your plot. 
-        To make a plot in the right hand plot, then use the command `ax = axs[1]` and then add the commands to make the plot in second plot.
+        Start your subplots using the command `_fig, _axs = plt.subplots(1, 2, figsize=(12,4))`.
+        To make your left hand plot, run the command `_ax = _axs[0]`, then use the usual plot commands to make your plot. 
+        To make the right hand plot, use the command `_ax = _axs[1]` and then add the commands for the second plot.
 
         Your left plot should plot the error, defined as the difference between the derivative calculated by the finite difference method, and the analytical answer:
 
@@ -399,11 +399,11 @@ def head_3_06():
         r"""
         ## Exercise 1.6
 
-        Write a loop that calculates the numerical derivative $f'(x)$ at $x=1$, using the forward, center, and backwards difference formulats.
-        In your loop, perform your calculation for 100 different values of $h$ spaced evenly spaced on log scale from $h = 1\times10^{-6}$ to $h = 1$.
+        Write a loop that calculates the numerical derivative $f'(x)$ at $x=1$, using the forward, center, and backwards difference formulas.
+        In your loop, perform your calculation for 100 different values of $h$ evenly spaced on a log scale from $h = 1\times10^{-6}$ to $h = 1$.
         For this, you can use the [`geomspace`](https://numpy.org/doc/stable/reference/generated/numpy.geomspace.html) function.
 
-        You can also use [`logspace`](https://numpy.org/doc/stable/reference/generated/numpy.logspace.html) if you want, but it is a bit tricker since using the `logspace` function, you can't specify the endpoints . 
+        You can also use [`logspace`](https://numpy.org/doc/stable/reference/generated/numpy.logspace.html) if you want, but it is a bit trickier, since `logspace` takes the exponents of the endpoints rather than the endpoints themselves. 
 
         Make a log-log plot of the error $\epsilon$ vs $h$ for the three techniques (three lines on the same graph), with $\epsilon$ defined as:
 
@@ -509,7 +509,7 @@ def head_3_07():
         r"""
         ## Exercise 1.7
 
-        Plot the data of a sparsly sampled sinusoid with 25 points between $t = 0$ and $t = 4 \pi$.
+        Plot the data of a sparsely sampled sinusoid with 25 points between $t = 0$ and $t = 4 \pi$.
         """
     )
 
@@ -556,7 +556,7 @@ def head_3_08():
         r"""
         ## Exercise 1.8
 
-        Calculate and plot forward derivative of the numerical data, along with the correct value from the analytical derivative of a sine function.
+        Calculate and plot the forward derivative of the numerical data, along with the correct value from the analytical derivative of a sine function.
         """
     )
 
@@ -635,7 +635,7 @@ def head_3_09():
         Hint: you don't have to do much work!
         But you will need a new time array.
 
-        Calculate the analytical answer $\cos(x)$ for the derivative at these same timesteps, and make a plot showing the two.
+        Calculate the analytical answer $\cos(t)$ for the derivative at these same timesteps, and make a plot showing the two.
         """
     )
 

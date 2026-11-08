@@ -91,8 +91,10 @@ Each energy level is therefore a root of $F$, which you can find with bisection:
 2. Integrate the even case from $x = 0$ to $x = L = 5$ with your RK4 implementation, with step $0.02$, for the trial energies $E = 0.3$, $0.5$ and $0.7$, and plot the three solutions.
 3. Find the even ground state and the odd first excited state by applying your bisection from [](#root-finding_page) to $F(E)$, with brackets around the exact energies.
 4. Extend each solution to $x < 0$ using its parity, normalise it with a numerical integral over $[-L, L]$, and plot it together with the exact wavefunction.
-5. Tabulate your two energies, the width of the final bisection bracket, and the difference from the exact energy.
-6. Explain, using the nodes of your three trial solutions, why $F(E)$ has opposite signs just below and just above $E_0$.
+5. Tighten the bisection tolerance until both the energy and the normalised wavefunction stop changing; this typically takes a tolerance of about $10^{-10}$.
+   A loose tolerance can give a plausible energy but a visibly distorted wavefunction.
+6. Tabulate your two energies, the width of the final bisection bracket, and the difference from the exact energy.
+7. Explain, using the nodes of your three trial solutions, why $F(E)$ has opposite signs just below and just above $E_0$.
    Explain why a very narrow final bisection bracket alone does not mean that your energy is accurate.
 :::
 
