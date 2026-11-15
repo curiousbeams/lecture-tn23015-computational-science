@@ -368,7 +368,7 @@ def sol_9_03c():
 def head_9_05():
     mo.md(
         r"""
-        ## Exercise 7.6
+        ## Exercise 7.7
 
         In this exercise we are going to calculate the mass of a 3D sphere with linearly increasing density.
         This problem is quite challenging to do analytically, but with Monte Carlo integration it is relatively easy.<br>
@@ -444,12 +444,12 @@ def sol_9_05():
 def head_9_06():
     mo.md(
         r"""
-        ## Exercise 7.7
+        ## Exercise 7.8
 
         Now we make it a bit more difficult by adjusting the code.
         Consider a density that is a linear function of the radius according to $\rho(r)=\rho_0 r$.<br>
 
-        Calculate the mass of the sphere for the case of the linearly increasing density using the methodology developed in Exercise 7.6 and the same parameters.
+        Calculate the mass of the sphere for the case of the linearly increasing density using the methodology developed in Exercise 7.7 and the same parameters.
         Store your calculated mass for $N=100$ as variable `mspherelin`.
         With some effort we can calculate the analytical answer as 1.5$\pi$, however, as you can see the Monte Carlo integration is a lot easier to implement.
         Increase $N$ to see whether your answer gets close to the analytical answer.

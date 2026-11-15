@@ -480,3 +480,43 @@ def _load_answers():
 
 
 ANSWERS = _load_answers()
+
+
+# The book's interactive figures are Observable notebooks, drawn by the anywidget module that the
+# book's `{anywidget}` directive loads too. Only the notebooks need this: on the web page the
+# directive draws them without any Python.
+FIGURE_MODULE = "https://curiousbeams.github.io/em-widgets/observable-notebook.mjs"
+
+
+async def interactive_figure(notebook, cells=None, module=FIGURE_MODULE, **options):
+    """One of the book's interactive figures, live in the notebook.
+
+        await interactive_figure("https://.../bisection-newton.html", cells=["controlsView"])
+
+    The figure loads from the internet. In the browser (JupyterLite, and marimo's web version)
+    the anywidget package is installed on first use, which is what the `await` is for; on your
+    own computer it comes with `requirements.txt`.
+    """
+    import sys
+
+    try:
+        import anywidget
+    except ModuleNotFoundError:
+        if sys.platform != "emscripten":
+            raise ModuleNotFoundError(
+                "the interactive figures need the anywidget package: run `pip install anywidget` "
+                "in the environment this notebook uses, then restart the notebook") from None
+        try:
+            import piplite as installer       # JupyterLite
+        except ModuleNotFoundError:
+            import micropip as installer      # marimo's web version
+        await installer.install("anywidget")
+        import anywidget
+    import traitlets
+
+    model = {"notebook": notebook, **({} if cells is None else {"cells": list(cells)}), **options}
+    kinds = {str: traitlets.Unicode, list: traitlets.List, dict: traitlets.Dict,
+             bool: traitlets.Bool, int: traitlets.Int, float: traitlets.Float}
+    traits = {key: kinds[type(value)]().tag(sync=True) for key, value in model.items()}
+    widget = type("Figure", (anywidget.AnyWidget,), {"_esm": module, **traits})(**model)
+    return mo.ui.anywidget(widget) if mo is not None else widget

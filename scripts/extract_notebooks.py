@@ -80,11 +80,22 @@ def exercise_prose(text: str) -> dict[str, str]:
 
 
 def exercise_numbers(text: str) -> dict[str, str]:
-    """{exercise key: the number the site prints}, e.g. `5_01` -> `3.1`."""
-    number, out = chapter_number(text), {}
-    for (kind, key), _, _ in cells(text):
-        if kind == "ex" and key not in out:
-            out[key] = f"{number}.{len(out) + 1}"
+    """{exercise key: the number the site prints}, e.g. `5_01` -> `3.1`.
+
+    Every `{exercise-start}` counts, including the few with no code cell of their own (7.6 in
+    Random Numbers is answered by editing 7.5's code). MyST numbers them all. Counting only the
+    exercises that have a stub put every later exercise in that chapter one behind the website.
+    """
+    number, out, lines = chapter_number(text), {}, text.split("\n")
+    for i, line in enumerate(lines):
+        if not line.strip().startswith(":::{exercise-start}"):
+            continue
+        for option in lines[i + 1:]:
+            if option.strip().startswith(":label: ex_"):
+                out[option.split()[1][3:]] = f"{number}.{len(out) + 1}"
+                break
+            if option.strip() == ":::":
+                break
     return out
 
 

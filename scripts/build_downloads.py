@@ -7,9 +7,9 @@ Each unpacks to a folder of the same name holding the eleven chapters, `tn23015.
 `data/`, a README and a `requirements.txt`. The module looks for `answers/` and `data/` beside
 itself, so the folder works as it unpacks, offline too.
 
-The marimo notebooks are the student versions, with the `sol_*` cells removed, exactly as
-`build_marimo_apps.sh` stages them for "open in marimo". The Jupyter notebooks have no solution
-cells to begin with.
+The marimo notebooks are the student versions, with the `sol_*` cells removed and the chapter's
+prose added, exactly as `build_marimo_apps.sh` stages them for "open in marimo". The Jupyter
+notebooks have no solution cells to begin with, and carry the prose too.
 
 Not committed: rebuild after the notebooks change. Every file gets the time of the book's last
 commit, so the same commit always gives the same zips.
@@ -25,7 +25,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from extract_notebooks import ROOT  # noqa: E402
-from make_student_notebooks import without_solutions  # noqa: E402
+from make_student_notebooks import student_notebook  # noqa: E402
 
 OUT = ROOT / "downloads"
 BOOK_URL = "https://cbl.curve.space/articles/curious-beams-lecture-tn23015-computational-science"
@@ -56,8 +56,8 @@ With a virtual environment, run the `activate` line again each time you open a n
 """
 
 FOOTER = """
-Everything works offline, except two figures that load from the internet: the ones in
-Linear Algebra and PDE I.
+The exercises and their checks work offline. The figures load from the internet, so a notebook
+opened offline shows the text without its pictures.
 
 Each notebook is a single file on your computer, so make a backup copy now and then.
 """
@@ -65,9 +65,10 @@ Each notebook is a single file on your computer, so make a backup copy now and t
 JUPYTER = """\
 # TN23015 Computational Science: Jupyter notebooks
 
-These are the exercises from the course book, as Jupyter notebooks you can run on your own
-computer. They are the same exercises with the same checks as the book and its **launch lite**
-button.
+These are the chapters of the course book, as Jupyter notebooks you can run on your own computer:
+the explanation, the figures, the interactive figures and the exercises, with the same checks as
+the book and its **launch lite** button. Each interactive figure is a code cell: run it to draw
+the figure.
 
 Book: {book}
 
@@ -87,9 +88,9 @@ Save often (Ctrl+S, or ⌘S on a Mac). Your work is saved in the `.ipynb` file.
 MARIMO = """\
 # TN23015 Computational Science: marimo notebooks
 
-These are the exercises from the course book, as marimo notebooks you can run on your own
-computer. They are the same exercises with the same checks as the book and its
-**open in marimo** button.
+These are the chapters of the course book, as marimo notebooks you can run on your own computer:
+the explanation, the figures, the interactive figures and the exercises, with the same checks as
+the book and its **open in marimo** button.
 
 Book: {book}
 
@@ -110,6 +111,9 @@ The rules are the same as in the book:
 
 Save with Ctrl+S (or ⌘S on a Mac). Your work is saved in the chapter's `.py` file. marimo also
 creates a `__marimo__/` folder beside the notebooks, and you can ignore it.
+
+To carry on in the browser instead, open the book's "continue a saved notebook" page (linked
+under each chapter's **open in marimo** button) and choose your `.py` file.
 {footer}"""
 
 
@@ -155,19 +159,18 @@ def main() -> int:
     module = ROOT / "packages" / "tn23015.py"
 
     ipynb = {p.name: p.read_bytes() for p in sorted((ROOT / "jupyter-notebooks").glob("[01][0-9].*.ipynb"))}
+    # anywidget draws the interactive figures, in both kinds of notebook
     build("tn23015-jupyter-notebooks", ipynb, module,
-          readme(JUPYTER, list(ipynb), "`conda install numpy scipy matplotlib jupyterlab`"),
-          ["jupyterlab"])
+          readme(JUPYTER, list(ipynb),
+                 "`conda install -c conda-forge numpy scipy matplotlib jupyterlab anywidget`"),
+          ["jupyterlab", "anywidget"])
 
-    marimo = {}
-    for nb in sorted((ROOT / "marimo-notebooks").glob("[01][0-9].*.py")):
-        text, _ = without_solutions(nb)
-        assert "def sol_" not in text, f"{nb.name}: a solution cell survived"
-        marimo[nb.name] = text
+    marimo = {nb.name: student_notebook(nb)
+              for nb in sorted((ROOT / "marimo-notebooks").glob("[01][0-9].*.py"))}
     build("tn23015-marimo-notebooks", marimo, module,
           readme(MARIMO, list(marimo),
-                 "`conda install -c conda-forge numpy scipy matplotlib marimo`"),
-          ["marimo>=0.23.16"])
+                 "`conda install -c conda-forge numpy scipy matplotlib marimo anywidget`"),
+          ["marimo>=0.23.16", "anywidget"])
 
     assert len(ipynb) == len(marimo) == 11, (len(ipynb), len(marimo))
     return 0

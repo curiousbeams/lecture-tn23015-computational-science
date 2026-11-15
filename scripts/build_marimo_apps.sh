@@ -40,7 +40,7 @@ STAGE=_marimo_src
 rm -rf _build/site/public/marimo-apps
 rm -rf "$STAGE" "$OUT"
 mkdir -p "$STAGE" "$OUT/public/wheels"
-.venv/bin/python scripts/make_student_notebooks.py --out "$STAGE" >/dev/null
+.venv/bin/python scripts/make_student_notebooks.py --out "$STAGE" --web >/dev/null
 cp marimo-notebooks/tn23015.py "$STAGE/"
 
 for nb in "$STAGE"/[01][0-9].*.py; do
@@ -90,6 +90,12 @@ done
 cp -r answers "$OUT/public/answers"
 cp -r data "$OUT/public/data"
 rm -rf "$STAGE"
+
+# Saved work: each chapter page reads a notebook saved into its address (#code/..., which is what
+# Ctrl+S writes) before its baked-in copy, and continue.js -- a widget in the book's notebook block,
+# and continue.html here -- reopens a saved .py. See the script for why the address and not
+# localStorage.
+.venv/bin/python scripts/make_marimo_continue.py "$OUT"
 
 # marimo ships its whole editor: CodeMirror grammars for two dozen languages, every Mermaid
 # diagram type, a SQL parser, Vega, cytoscape, a terminal. A Python notebook touches none of it.

@@ -20,8 +20,11 @@ cp -r answers _jupyter_lite_src/answers
 # 4.8 MB, and it means no reader's exercise depends on GitHub being reachable
 cp -r data _jupyter_lite_src/data
 
+# anywidget is here for its JupyterLab extensions, its own and (through ipywidgets) the widget
+# manager: the build bundles every extension installed beside it, ~1.3 MB for these two. The Python
+# package itself is installed in the browser on first use, by `tn23015.interactive_figure`.
 uv run --no-project \
-  --with jupyterlite-core --with jupyterlite-pyodide-kernel --with jupyter-server \
+  --with jupyterlite-core --with jupyterlite-pyodide-kernel --with jupyter-server --with anywidget \
   jupyter lite build --contents _jupyter_lite_src --output-dir jupyter-lite \
   --apps lab --no-unused-shared-packages --no-sourcemaps
 

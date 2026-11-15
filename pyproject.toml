@@ -5,6 +5,8 @@ description = "Computational Science interactive textbook (TN23015), MyST + mari
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "anywidget>=0.11.0",
+    "ipykernel>=7.4.0",
     "jupyter-book-marimo>=0.0.3",
     "marimo>=0.23.16",
     "matplotlib>=3.10",

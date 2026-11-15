@@ -55,7 +55,10 @@ def cdn_key(argv: list[str]) -> str:
     import json
     return json.loads(SUBMIT_LOG.read_text())["job"]["results"]["cdnKey"]
 
-TITLE = ":::{admonition} Rather work in a notebook?"
+# Four colons, because the block holds a directive of its own (the continue widget). Blocks written
+# before that had three, and `strip_block` recognises both, so re-running converts them.
+TITLE = "::::{admonition} Rather work in a notebook?"
+OLD_TITLES = (TITLE, ":::{admonition} Rather work in a notebook?")
 LITE_BADGE = "https://jupyterlite.rtfd.io/en/stable/_static/badge-launch.svg"
 MARIMO_BADGE = "https://marimo.io/shield.svg"
 ANCHOR = ":::{exercise-start}"
@@ -65,20 +68,35 @@ ANCHOR = ":::{exercise-start}"
 # the copy held by marimo's save worker, which starts out empty, so before the first save it
 # downloads a 0-byte notebook.py without any error. (marimo.app behaves the same.) Markdown, HTML
 # and flat-script exports work without saving; Jupyter is greyed out in WASM.
+#
+# Saving also puts the notebook in the page address (`#code/…`), and `make_marimo_continue.py`
+# makes the page read it back, so a reload or a bookmark keeps the work. The badge link itself has
+# no `#code/` part and always opens the current notebook. Students must be told that, because
+# clicking the badge again is the natural thing to try.
+#
+# The widget at the end is the way back from a saved file: `continue.js`, served beside the marimo
+# apps (so it moves with the cdnKey like the badges), and told which chapter it is in.
 def block(slug: str, base: str) -> str:
     return "\n".join([
         TITLE,
         ":class: seealso",
         "",
-        "The same exercises, without the surrounding explanation, running in your browser with nothing to install.",
+        "This chapter as a notebook, explanation and exercises together, running in your browser with nothing to install.",
         "The Lite notebook keeps your edits in this browser if you close the tab, but not on another device, after"
-        " you clear your browsing data, or when the notebooks are updated: use File → Download to keep a copy.",
-        "The marimo version loses your edits when you close the tab: to keep a copy, save (Ctrl+S, or ⌘S on a Mac)"
-        " and then choose Download → Download notebook source from the menu.",
+        " you clear your browsing data, or when the notebooks are updated: use File → Download to keep a copy,"
+        " and the Upload button above the file list to bring one back.",
+        "In the marimo version, save often (Ctrl+S, or ⌘S on a Mac): each save stores your work in the page address,"
+        " so reloading, reopening the tab or a bookmark brings it back, while the **open in marimo** button always"
+        " opens a fresh copy."
+        " To keep a file, choose Download → Download notebook source, and to carry on from one, choose it below.",
         "",
         f"[![launch lite]({LITE_BADGE})]({base}/jupyter-lite/lab/index.html?path={slug}.ipynb)",
         f"[![open in marimo]({MARIMO_BADGE})]({base}/marimo-apps/{slug}/index.html)",
+        "",
+        f":::{{anywidget}} {base}/marimo-apps/continue.js",
+        f'{{"chapter": "{slug}"}}',
         ":::",
+        "::::",
     ])
 
 
@@ -99,11 +117,12 @@ def apply(path: Path, base: str) -> tuple[str, bool]:
 
 
 def strip_block(lines: list[str]) -> list[str]:
-    """The page without its badge block, wherever it currently sits."""
-    if TITLE not in lines:
+    """The page without its badge block, wherever it currently sits, in either of its forms."""
+    start = next((i for i, ln in enumerate(lines) if ln in OLD_TITLES), None)
+    if start is None:
         return lines
-    start = lines.index(TITLE)
-    end = next(i for i in range(start + 1, len(lines)) if lines[i].rstrip() == ":::")
+    fence = lines[start].split("{", 1)[0]          # the closing line has the opener's colons
+    end = next(i for i in range(start + 1, len(lines)) if lines[i].rstrip() == fence)
     del lines[start:end + 1]
     while start < len(lines) and not lines[start].strip():
         del lines[start]
