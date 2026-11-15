@@ -20,7 +20,7 @@ def demo_01():
     _ax.set_ylabel("Impulse response h(t)")
     _ax.set_xlabel("Time");
 
-    _ax
+    show(_ax)
 
 
 @app.cell
@@ -37,6 +37,8 @@ def demo_02():
 
     plt.title('Illustration of the convolution integral')
 
+    show(ax)
+
 
 @app.cell
 def demo_03():
@@ -48,8 +50,8 @@ def demo_03():
     _fig, _axs = plt.subplots(1, 2, figsize=(12,4))
     _ax = _axs[0]
     _ax.plot(w,np.abs(h_2))
-    _ax.set_xlabel("$\omega$")
-    _ax.set_ylabel("$|h(\omega)|$")
+    _ax.set_xlabel(r"$\omega$")
+    _ax.set_ylabel(r"$|h(\omega)|$")
     _ax.set_xscale('log')
     _ax.set_yscale('log')
     _ax.grid()
@@ -57,12 +59,12 @@ def demo_03():
     _ax = _axs[1]
     _ax.plot(w, np.angle(h_2)/np.pi*180)
     _ax.set_xscale('log')
-    _ax.set_xlabel("$\omega$")
+    _ax.set_xlabel(r"$\omega$")
     _ax.set_ylabel(r"Phase angle of $\tilde h$ (degrees)")
     _ax.grid()
     _ax.set_yticks(np.arange(-90,1,15));
 
-    _fig
+    show(_fig)
 
 
 @app.cell(hide_code=True)
@@ -339,7 +341,7 @@ def demo_04():
     _fig.colorbar(_im2)
     _fig.tight_layout()
 
-    _fig
+    show(_fig)
 
 
 @app.cell(hide_code=True)

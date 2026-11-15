@@ -232,7 +232,7 @@ def sol_13_02():
     _fig, _ax = plt.subplots()
     _ax.plot(delta_max_list_sol1)
     _ax.set_yscale('log')
-    _ax.set_ylabel("$\Delta \phi_{max}$ (V)")
+    _ax.set_ylabel(r"$\Delta \phi_{max}$ (V)")
     _ax.set_xlabel("Iteration number")
 
     show(_ax)
@@ -388,7 +388,7 @@ def sol_13_04():
     _ax.plot(delta_max_list_sol1, label="Jacobi")
     _ax.plot(delta_max_list_sol3, label="Gauss-Seidel")
     _ax.set_yscale('log')
-    _ax.set_ylabel("$\Delta \phi_{max}$ (V)")
+    _ax.set_ylabel(r"$\Delta \phi_{max}$ (V)")
     _ax.set_xlabel("Iteration number")
     _ax.legend()
 
@@ -516,7 +516,7 @@ def sol_13_06():
     _ax.plot(delta_max_list_sol3, label="Gauss-Seidel")
     _ax.plot(delta_max_list_sol5, label="SOR")
     _ax.set_yscale('log')
-    _ax.set_ylabel("$\Delta \phi_{max}$ (V)")
+    _ax.set_ylabel(r"$\Delta \phi_{max}$ (V)")
     _ax.set_xlabel("Iteration number")
     _ax.legend()
 

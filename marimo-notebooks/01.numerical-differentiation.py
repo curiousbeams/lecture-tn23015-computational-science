@@ -492,7 +492,7 @@ def sol_3_06():
     _ax.loglog(h_sol6, err_center_sol6,'.', label="Center")
     _ax.loglog(h_sol6, err_backward_sol6, '.', label="Backward")
     _ax.legend()
-    _ax.set_ylabel("Error $\epsilon$")
+    _ax.set_ylabel(r"Error $\epsilon$")
     _ax.set_xlabel("Step size $h$")
 
     h_sol6 = h_sol6.copy()
@@ -582,7 +582,7 @@ def ex_3_08():
 
         # And now a nice plot (for free this time)
         _fig, _ax = plt.subplots()
-        _ax.plot(t, analytical_derv, '-o', label = "$\cos(x)$")
+        _ax.plot(t, analytical_derv, '-o', label = r"$\cos(x)$")
         _ax.plot(t_fwd, fwd_derv, '-o', label = "Fwd")
         _ax.legend()
         _ax.set_xlabel('t')
@@ -608,7 +608,7 @@ def sol_3_08():
     analytical_derv_sol8 = np.cos(t_sol7)
 
     _fig, _ax = plt.subplots()
-    _ax.plot(t_sol7, analytical_derv_sol8, '-o', label = "$\cos(x)$")
+    _ax.plot(t_sol7, analytical_derv_sol8, '-o', label = r"$\cos(x)$")
     _ax.plot(t_fwd_sol8, fwd_derv_sol8, '-o', label = "Fwd")
     _ax.legend()
     _ax.set_xlabel('t')
@@ -707,7 +707,7 @@ def demo_01():
     _ax.plot(t_2[:-1], dvdt)
     _ax.set_xlabel("t")
     _ax.set_ylabel("dvdt")
-    _fig
+    show(_fig)
 
 
 @app.cell(hide_code=True)
@@ -804,7 +804,7 @@ def demo_02():
 
     _ax.legend()
     _ax.set_xlabel("x")
-    _ax
+    show(_ax)
 
 
 @app.cell
@@ -858,7 +858,7 @@ def demo_03():
     _ax.set_ylabel("y")
 
     _fig.tight_layout()
-    _fig
+    show(_fig)
 
 
 if __name__ == "__main__":

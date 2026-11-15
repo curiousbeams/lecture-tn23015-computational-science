@@ -14,7 +14,7 @@ is it; `sync_checker.py --check` is what keeps the twelve copies honest.
 
 The one difference between the two homes is how a thing is *rendered*: marimo has `mo.md` and
 `mo.callout`, a Jupyter notebook has `IPython.display`, and a test script has neither. That is
-the whole job of the four `_md` / `_callout` / `_stack` / `_fold` helpers at the top --
+the whole job of the five `_md` / `_callout` / `_stack` / `_fold` / `_figure` helpers at the top --
 everything below them is environment-agnostic, which is why it can be shared byte for byte.
 
 `ANSWERS` is *not* here. The answer bank is per chapter: the converter writes it into the page
@@ -75,6 +75,30 @@ def _fold(label, body):
     if mo is not None:
         return mo.accordion({label: body})
     return body                          # notebooks show it all; there is nothing to fold into
+
+
+def _figure(item):
+    """A plot as a Jupyter notebook should draw it: once, and as a picture.
+
+    Jupyter's inline backend draws every figure still open when a cell ends. So a figure that was
+    also the cell's result came out twice, and an axes came out as a `<Axes: ...>` line above the
+    one picture. Here an axes (or a legend, or any other part of a plot) becomes its figure, and
+    the figure is closed: that takes it off the backend's list, and it can still be displayed.
+    marimo draws only what a cell returns, so there it passes through untouched.
+    """
+    import sys
+    artist = sys.modules.get("matplotlib.artist")
+    if mo is not None or _display is None or artist is None or not isinstance(item, artist.Artist):
+        return item
+    from matplotlib.figure import Figure
+    import matplotlib.pyplot as plt
+    figure = item
+    while figure is not None and not isinstance(figure, Figure):
+        figure = figure.figure               # axes -> (subfigure ->) figure
+    if figure is None:                       # not on a figure: nothing to draw
+        return item
+    plt.close(figure)
+    return figure
 
 
 def md(text):
@@ -352,7 +376,7 @@ def show(*objects, **blanks):
     blocks = []
     if text.strip():
         blocks.append(format_printed(text))
-    blocks.extend(d for d in displays if d is not None)
+    blocks.extend(_figure(d) for d in displays if d is not None)
 
     if missing:
         names = ", ".join(f"`{m}`" for m in missing)
