@@ -15,6 +15,7 @@ export, so it would be a lie.
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -52,7 +53,6 @@ def cdn_key(argv: list[str]) -> str:
         return argv[argv.index("--key") + 1]
     if not SUBMIT_LOG.exists():
         raise SystemExit(f"no {SUBMIT_LOG.relative_to(ROOT)}; submit once, or pass --key <uuid>")
-    import json
     return json.loads(SUBMIT_LOG.read_text())["job"]["results"]["cdnKey"]
 
 # Four colons, because the block holds a directive of its own (the continue widget). Blocks written
@@ -74,27 +74,28 @@ ANCHOR = ":::{exercise-start}"
 # no `#code/` part and always opens the current notebook. Students must be told that, because
 # clicking the badge again is the natural thing to try.
 #
-# The widget at the end is the way back from a saved file: `continue.js`, served beside the marimo
-# apps (so it moves with the cdnKey like the badges), and told which chapter it is in.
+# The block itself stays short: the About page's `saving-work` box says how each version keeps work,
+# and the block links there.
+#
+# The widget at the end is the way back from a saved file. Its module is the local
+# `marimo-apps/continue.js`, which MyST copies into the site, so it is in every build. It is told
+# the chapter, and where the apps are (they move with the cdnKey, like the badges); see
+# `make_marimo_continue.py` for why it cannot work that out from its own address.
 def block(slug: str, base: str) -> str:
+    model = json.dumps({"chapter": slug, "apps": f"{base}/marimo-apps/"})
     return "\n".join([
         TITLE,
         ":class: seealso",
         "",
-        "This chapter as a notebook, explanation and exercises together, running in your browser with nothing to install.",
-        "The Lite notebook keeps your edits in this browser if you close the tab, but not on another device, after"
-        " you clear your browsing data, or when the notebooks are updated: use File → Download to keep a copy,"
-        " and the Upload button above the file list to bring one back.",
-        "In the marimo version, save often (Ctrl+S, or ⌘S on a Mac): each save stores your work in the page address,"
-        " so reloading, reopening the tab or a bookmark brings it back, while the **open in marimo** button always"
-        " opens a fresh copy."
-        " To keep a file, choose Download → Download notebook source, and to carry on from one, choose it below.",
+        "This chapter as a notebook, explanation and exercises together, running in your browser.",
+        "Your work is kept in this browser only, so download a copy to keep it"
+        " ([how saving works](#saving-work)).",
         "",
         f"[![launch lite]({LITE_BADGE})]({base}/jupyter-lite/lab/index.html?path={slug}.ipynb)",
         f"[![open in marimo]({MARIMO_BADGE})]({base}/marimo-apps/{slug}/index.html)",
         "",
-        f":::{{anywidget}} {base}/marimo-apps/continue.js",
-        f'{{"chapter": "{slug}"}}',
+        ":::{anywidget} marimo-apps/continue.js",
+        model,
         ":::",
         "::::",
     ])
