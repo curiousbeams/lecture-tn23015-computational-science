@@ -447,26 +447,23 @@ def ex_7_07():
     # Exercise 5.7
 
     T1 = 10
+    T2 = 5
 
     # t1_2 = np.arange(___,___,___)
 
+    # y1_2 = np.cos(2*np.pi*1.0*t1_2)
     # y1t_2 = _____
     # f1_2 = np.fft.fftfreq(___,____)
     # power1 = ____
     # t2_2 = np.arange(___,___,___)
+    # y2_4 = np.cos(2*np.pi*1.0*t2_2)
     # y2t_4 = ___
     # f2_2 = np.fft.fftfreq(___, ___)
     # power2 = ____
 
     # Do not edit or remove the boiler-plate code below.
-    T2 = _ax = y1_2 = y2_4 = None
+    _ax = None
     if given(f1_2, f2_2, power1, power2, t1_2, t2_2, y1t_2, y2t_4):
-        y1_2 = np.cos(2*np.pi*1.0*t1_2) 
-
-        T2 = 5
-
-        y2_4 = np.cos(2*np.pi*1.0*t2_2) 
-
         _fig, _ax = plt.subplots()
         _ax.plot(s(f1_2), s(power1), 'o-', label="T = 10 s")
         _ax.plot(s(f2_2), s(power2), 'o-', label="T = 5 s")
@@ -598,6 +595,9 @@ def head_7_09():
 
 @app.cell
 def ex_7_09():
+    # The Fourier transform of the voltage
+    vt = np.fft.fft(v) if given(v) else None
+
     # Fill these in as you work through the exercise.
     T = dt = f_2 = fs_2 = power = None
 
@@ -608,11 +608,8 @@ def ex_7_09():
     # power = _____
 
     # Do not edit or remove the boiler-plate code below.
-    _ax = end = vt = None
+    _ax = end = None
     if given(T, dt, f_2, fs_2, power, v):
-
-        # The Fourier transform of the voltage
-        vt = np.fft.fft(v)
 
         # The total time of the trace, the time step, and the sampling frequency
 
@@ -678,7 +675,7 @@ def head_7_10():
 @app.cell
 def ex_7_10():
     # Exercise 5.10
-    # (Use `f` from the previous exercise)
+    # (Use `f_2`, `power` and `end` from the previous exercise)
 
     # Fill these in as you work through the exercise.
     peak_frequency = peak_power = None

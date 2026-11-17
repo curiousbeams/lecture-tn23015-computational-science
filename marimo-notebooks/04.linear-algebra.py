@@ -73,7 +73,7 @@ def head_6_02():
         This is utilized to make the matrix describing the linear set of equations upper triangular.
         The solution is then easily obtained by back-substitution from the bottom equation to the top.
         The program below can solve the four resulting equations using Gaussian elimination and find the four voltages.
-        Use your result obtained above to set-up the correct `A` matrix and `v` vector for your problem.
+        Use your result obtained above to set-up the correct matrix `_A` and vector `_v` for your problem.
         Go through it and notice how Python efficiently uses the matrix $A$ storage and works on entire rows by slicing.
 
         NB: make sure to set up the matrix $A$ such that the solution is in the form `x = [V1, V2, V3, V4]`.
@@ -85,43 +85,42 @@ def head_6_02():
 @app.cell
 def ex_6_02():
     # Fill these in as you work through the exercise.
-    A = v = None
+    _A = _v = None
 
-    # A = ...
-    # v = ...
+    # _A = ...
+    # _v = ...
 
     # Do not edit or remove the boiler-plate code below.
-    N = div = mult = x = None
-    if given(A, v):
-        N = len(v)
+    if given(_A, _v):
+        _N = len(_v)
 
         # Gaussian elimination
-        for _m in range(N):
+        for _m in range(_N):
 
             # Divide by the diagonal element
-            div = A[_m,_m]
-            A[_m,:] /= div
-            v[_m] /= div
+            _div = _A[_m,_m]
+            _A[_m,:] /= _div
+            _v[_m] /= _div
 
             # Now subtract from the lower rows
-            for _i in range(_m+1,N):
-                mult = A[_i,_m]
-                A[_i,:] -= mult*A[_m,:]
-                v[_i] -= mult*v[_m]
+            for _i in range(_m+1,_N):
+                _mult = _A[_i,_m]
+                _A[_i,:] -= _mult*_A[_m,:]
+                _v[_i] -= _mult*_v[_m]
         print('The matrix after Gaussian elimination is')
-        print(A)
+        print(_A)
 
         # Backsubstitution
-        x = empty(N,float)
-        for _m in range(N-1,-1,-1):
-            x[_m] = v[_m]
-            for _i in range(_m+1,N):
-                x[_m] -= A[_m,_i]*x[_i]
+        _x = empty(_N,float)
+        for _m in range(_N-1,-1,-1):
+            _x[_m] = _v[_m]
+            for _i in range(_m+1,_N):
+                _x[_m] -= _A[_m,_i]*_x[_i]
 
         print('The solution is')
-        print(x)
+        print(_x)
 
-    show(A=A, v=v)
+    show(_A=_A, _v=_v)
 
 
 @app.cell(hide_code=True)
@@ -187,6 +186,12 @@ def ex_6_03():
     # Fill these in as you work through the exercise.
     detA = invA = rankA = None
 
+    # The matrix A from the text:
+    _A = np.array([[0, 0, 2, 3],
+                   [4, 2, 3, 1],
+                   [2, 5, 1, 2],
+                   [1, 0, 0, 1]], dtype=float)
+
     # invA = ...
     # rankA = ...
     # detA = ...
@@ -238,10 +243,15 @@ def head_6_03b():
 @app.cell
 def ex_6_03b():
     # Your code here:
+    _A = np.array([[0, 0, 2, 3],
+                   [4, 2, 3, 1],
+                   [2, 5, 1, 2],
+                   [1, 0, 0, 1]], dtype=float)
 
-    # print(np.linalg.matrix_rank(A))
-    # print(np.linalg.det(A))
-    # print(np.linalg.inv(A))
+    # _A[3, :] = ...
+    # print(np.linalg.matrix_rank(_A))
+    # print(np.linalg.det(_A))
+    # print(np.linalg.inv(_A))
 
     # Do not edit or remove the boiler-plate code below.
     show()
@@ -249,15 +259,16 @@ def ex_6_03b():
 
 @app.cell(hide_code=True)
 def sol_6_03b():
-    A_sol3[3,:]=A_sol3[2,:]
-    print(np.linalg.matrix_rank(A_sol3))
-    print(np.linalg.det(A_sol3))
+    _A = A_sol3.astype(float)
+    _A[3,:]=_A[2,:]
+    print(np.linalg.matrix_rank(_A))
+    print(np.linalg.det(_A))
 
     eps_sol4=1e-16
-    A_sol3[3,:]=(1-eps_sol4)*A_sol3[2,:]
-    print(np.linalg.matrix_rank(A_sol3))
-    print(np.linalg.det(A_sol3))
-    print(np.linalg.inv(A_sol3))
+    _A[3,:]=(1-eps_sol4)*_A[2,:]
+    print(np.linalg.matrix_rank(_A))
+    print(np.linalg.det(_A))
+    print(np.linalg.inv(_A))
 
     show()
 
@@ -348,7 +359,7 @@ def head_6_05():
 @app.cell
 def ex_6_05():
     # Fill these in as you work through the exercise.
-    A_2 = eigA = eigvA = None
+    A = eigA = eigvA = None
 
     # define parameters
     T=1
@@ -356,17 +367,17 @@ def ex_6_05():
     a_2=0.25
     b_2=0.25
 
-    # A_2 = ...
+    # A = ...
     # eigA = ...
     # eigvA = ...
 
     # Do not edit or remove the boiler-plate code below.
-    show(A=A_2, eigA=eigA, eigvA=eigvA)
+    show(A=A, eigA=eigA, eigvA=eigvA)
 
 
 @app.cell(hide_code=True)
 def check_6_05():
-    check_answers(A_2=A_2, eigA=eigA, eigvA=eigvA, key="answer_6_05")
+    check_answers(A=A, eigA=eigA, eigvA=eigvA, key="answer_6_05")
 
 
 @app.cell(hide_code=True)
@@ -458,20 +469,21 @@ def head_6_05b():
 
 @app.cell
 def ex_6_05b():
-    # Fill these in as you work through the exercise.
-    xt = None
-
-    # xt = ...
-
-    # Do not edit or remove the boiler-plate code below.
+    # Given: the two eigenvectors from exercise 4.6, the starting point and the times.
     t = v1 = v2 = x0 = None
-    if given(xt, eigvA):
+    if given(eigvA):
         v1 = eigvA[:,0]
         v2 = eigvA[:,1]
         x0 = np.array([1,0])
 
         t = np.linspace(0,10,100)
 
+    # Fill these in as you work through the exercise.
+    xt = None
+
+    # xt = ...
+
+    # Do not edit or remove the boiler-plate code below.
     show(xt=xt, eigvA=eigvA)
 
 

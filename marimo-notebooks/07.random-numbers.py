@@ -197,6 +197,7 @@ def head_9_03():
 def ex_9_03():
     # Fill these in as you work through the exercise.
     pi_est = None
+    _x = _y = None
 
     # Use seed to fix random number generation
     np.random.seed(0)
@@ -208,9 +209,12 @@ def ex_9_03():
 
     npoints=100
 
+    # _x = ...
+    # _y = ...
     # pi_est = ...
 
-    _ax.plot(x_3,y,'ob')
+    if given(_x, _y):
+        _ax.plot(_x,_y,'ob')
     _ax.set_xlabel('X-coordinate')
     _ax.set_ylabel('Y-coordinate')
     _ax.axis('square')
@@ -287,12 +291,12 @@ def head_9_03b():
         r"""
         ## Exercise 7.4
 
-        Generate an array `x` of 100 random numbers between 0 and 10 and count using Boolean indexing how many numbers are larger than 5.<br>
+        Generate an array `x_4` of 100 random numbers between 0 and 10 and count using Boolean indexing how many numbers are larger than 5.<br>
 
         Method 1:
-        * Make a Boolean value array `y` for the condition `x>5`
-        * Print the variable `y`, the values are Boolean, i.e., `True` or `False`
-        * Extract from array `x` the elements that match the condition with `x[y]`
+        * Make a Boolean value array `mask` for the condition `x_4>5`
+        * Print the variable `mask`, the values are Boolean, i.e., `True` or `False`
+        * Extract from array `x_4` the elements that match the condition with `x_4[mask]`
         * Calculate the length of the extracted array
         """
     )
@@ -338,8 +342,8 @@ def head_9_03c():
         ## Exercise 7.5
 
         Method 2
-        * Make a Boolean variable `y` for the condition `x>5`
-        * Take the sum of `y`
+        * Make a Boolean variable `mask_2` for the condition `x_4>5`
+        * Take the sum of `mask_2`
         """
     )
 

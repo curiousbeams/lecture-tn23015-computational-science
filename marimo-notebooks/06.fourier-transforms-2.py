@@ -538,7 +538,7 @@ def head_8_08():
 
         Here, you will make an interactive zoom of your diffraction pattern.
         Fill in the code below to
-        show the central `zoom.value` pixels of the image.
+        show the central `zoom_3.value` pixels of the image.
 
         Two sliders let you adjust the zoom and the maximum of the colormap (in logarithmic
         intervals).

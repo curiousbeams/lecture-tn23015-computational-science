@@ -65,10 +65,10 @@ def ex_14_01():
     # T[...] = 0
 
     # t1 = time()
-    # for i in range(N_t-1):
+    # for _i in range(Nt-1):
     #     # Note that we don't update the boundaries at x=0 and x=L
-    #     for j in range(...,...):
-    #         T[i+1,j] = T[i,j] + ... 
+    #     for _j in range(...,...):
+    #         T[_i+1,_j] = T[_i,_j] + ... 
     # t2 = time()
 
     # Do not edit or remove the boiler-plate code below.
@@ -193,21 +193,20 @@ def ex_14_02():
     # Let's make it 1 m long
     L_2 = 1
     Nx_2 = 100
+    # Our time axis: 1.2 seconds long
+    Nt_2 = 550
+    tf_2 = 1.2
     # x_2 = np.linspace(...)
 
     # t_2 = np.linspace(...)
     # u = np.zeros(...)
     # v = np.zeros(...)
 
-    # Do not edit or remove the boiler-plate code below.
-    Nt_2 = dt_2 = dx_2 = t1_2 = t2_2 = tf_2 = None
+    # Fill in the commented lines below, but leave the rest of this block in place.
+    dt_2 = dx_2 = t1_2 = t2_2 = None
     if given(t_2, u, v, x_2):
         dx_2 = x_2[1]
 
-        # Our time axis
-        # Let's make it 1.2 seconds long
-        Nt_2 = 550
-        tf_2 = 1.2
         dt_2 = t_2[1]
 
         # A matrix for tracking the vertical displacement of the string
@@ -227,8 +226,8 @@ def ex_14_02():
             for _j in range(1,Nx_2-1):
                 ...
 
-                #u[i+1,j] = ...
-                #v[i+1,j] = ...
+                #u[_i+1,_j] = ...
+                #v[_i+1,_j] = ...
 
         t2_2 = time()
 
@@ -353,7 +352,7 @@ def head_14_03():
 @app.cell
 def ex_14_03():
     # Fill these in as you work through the exercise.
-    k = uk = uk0 = vk0 = w = None
+    k = uk0 = vk0 = w = None
 
     # The wave velocity in the string
     c_2 = 1 # m/s
@@ -378,15 +377,14 @@ def ex_14_03():
     # w = ...
 
     def calc_u(t):
-        #uk = ...
-        return my_idst(uk)
+        # uk = ...
+        # return my_idst(uk)
+        return None
 
     # Do not edit or remove the boiler-plate code below.
-    # `calc_u` raises on an unfilled `uk` rather than returning something the checker can recognise
-    # as unanswered, so unlike the other answers it has to be gated.
-    u_at_10 = calc_u(10) if given(uk) else None
+    u_at_10 = calc_u(10) if given(calc_u) else None
 
-    show(k=k, uk=uk, uk0=uk0, vk0=vk0, w=w)
+    show(k=k, uk0=uk0, vk0=vk0, w=w, calc_u=calc_u)
 
 
 @app.cell(hide_code=True)
@@ -457,7 +455,7 @@ def demo_06():
 def demo_07():
     # Do not edit or remove the boiler-plate code below.
     _ax = None
-    if given(uk):
+    if given(calc_u):
         _fig, _ax = plt.subplots()
         _ax.plot(x_3, calc_u(t_3[step_3.value]))
         _ax.set_ylim(-1.2, 1.2)
@@ -465,7 +463,7 @@ def demo_07():
         _ax.set_xlabel("Distance x (m)")
         _ax.set_title("t = %.4f seconds" % t_3[step_3.value])
 
-    show(step_3, _ax, uk=uk)
+    show(step_3, _ax, calc_u=calc_u)
 
 
 @app.cell

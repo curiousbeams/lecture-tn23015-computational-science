@@ -47,8 +47,8 @@ def ex_11_01():
     def dVdt(V):
         return None
 
-    # for i in range(___,___):
-    #     V[i] = ..
+    # for _i in range(___,___):
+    #     V[_i] = ..
 
     # Now make a plot (with appropriate labels!)
     # _fig, _ax = plt.subplots()
@@ -132,14 +132,14 @@ def ex_11_02():
     V_2 = np.empty(N_2)
 
     # Initial condition
-    # V[0] = ____
+    # V_2[0] = ____
 
     # A function for returning the derivative
     def dVdt_2(t,V):
         return None
 
-    # for i in range(___,___):
-    #     V[i] = ..
+    # for _i in range(___,___):
+    #     V_2[_i] = ..
 
     # Now make a plot (with appropriate labels!)
     # _fig, _ax = plt.subplots()
@@ -232,9 +232,9 @@ def ex_11_03():
     def dxdt(v):
         return None
 
-    # for i in range(___,___):
-    #     x[i] = ... 
-    #     v[i] = ...
+    # for _i in range(___,___):
+    #     x[_i] = ... 
+    #     v[_i] = ...
 
     # An appropriate plot
     # _fig, _ax = plt.subplots()
@@ -318,7 +318,7 @@ def ex_11_04():
     V_3 = np.empty(N_4)
 
     # Initial condition
-    # V[0] = ....
+    # V_3[0] = ....
 
     # A function for returning the derivative (for generality, make it a
     # function of both V and t, although it may not depend explicitly on t
@@ -417,8 +417,8 @@ def ex_11_05():
     v_2 = np.empty(N_5)
 
     # Initial condition
-    # v[0] = ....
-    # x[0] = ....
+    # v_2[0] = ....
+    # x_2[0] = ....
 
     def dvdt_2(x):
         return None
@@ -430,8 +430,8 @@ def ex_11_05():
         ...
 
         # ....
-        #x[i] = ....
-        #v[i] = .... 
+        #x_2[_i] = ....
+        #v_2[_i] = .... 
 
     # And the plot
     # _fig, _ax = plt.subplots()
@@ -519,7 +519,7 @@ def ex_11_06():
     V_4 = np.empty(N_6)
 
     # Initial condition
-    # V[0] = ....
+    # V_4[0] = ....
 
     # A function for returning the derivative
     def dVdt_4(V,t):
@@ -528,7 +528,7 @@ def ex_11_06():
     for _i in range(1,N_6):
         ...
 
-        #V[i] = ...
+        #V_4[_i] = ...
     # And the plot
     # _fig, _ax = plt.subplots()
     # ...
@@ -619,7 +619,7 @@ def ex_11_07():
     def dVdt_5(t,V):
         return None
 
-    #sol = solve_ivp(dVdt, ...., ....)
+    #sol = solve_ivp(dVdt_5, ...., ....)
 
     # By default, the independent variable is always stored in the name sol.t
     # t_7 = ....
@@ -630,9 +630,9 @@ def ex_11_07():
     # it using sol.y[0,:]
     # V_5 = ....
 
-    # A plot with the scipy answer and your answer from Exercise 8.5 (with legend)
+    # A plot with the scipy answer and your answer from Exercise 8.6 (with legend)
     # _fig, _ax = plt.subplots()
-    # _ax.plot(t,V, 'o', label=....)
+    # _ax.plot(t_7,V_5, 'o', label=....)
     # _ax.plot(t_6, V_4, label=...)
 
     # Do not edit or remove the boiler-plate code below.
@@ -703,7 +703,7 @@ def ex_11_08():
     def dVdt_6(t,V):
         return None
 
-    # sol_2 = solve_ivp(dVdt, ...., ...., t_eval=......)
+    # sol_2 = solve_ivp(dVdt_6, ...., ...., t_eval=......)
     # t_8 = ...
     # V_6 = ...
 
@@ -713,8 +713,8 @@ def ex_11_08():
         _fig, _axs = plt.subplots(1, 2, figsize=(12,4))
         _ax = _axs[0]
 
-        # _ax.plot(t,V_4, '--', linewidth=4, label=...)
-        # _ax.plot(t,V, label=...)
+        # _ax.plot(t_6,V_4, '--', linewidth=4, label=...)
+        # _ax.plot(t_8,V_6, label=...)
         _ax = _axs[1]
         _ax.plot(t_8,V_6-V_4)
         _fig.tight_layout()
@@ -773,7 +773,7 @@ def head_11_09():
 @app.cell
 def ex_11_09():
     # Fill these in as you work through the exercise.
-    sol_3 = v_3 = v0 = x_3 = x0 = None
+    sol_3 = v0 = x_3 = x0 = None
 
     N_7 = 1000
     t_9 = np.linspace(0,10*np.pi*2,N_7)
@@ -783,15 +783,15 @@ def ex_11_09():
     # The derivative function
     def dydt(t,y):
         return None
-        #x_3 = ...
-        #v_3 = ...
+        #x = ...
+        #v = ...
         #return ...
 
     # x0 = ...
     # v0 = ...
 
     # Solve it
-    # sol_3 = solve_ivp(dydt, ..., , ..., t_eval=t)
+    # sol_3 = solve_ivp(dydt, ..., , ..., t_eval=t_9)
 
     # Extract the answers
     # t_9 = ...
@@ -799,14 +799,14 @@ def ex_11_09():
 
     # Fill in the commented lines below, but leave the rest of this block in place.
     _fig = None
-    if given(sol_3, v_3, v0, x_3, x0, x_2, dydt):
+    if given(sol_3, v0, x_3, x0, x_2, dydt):
 
         #Now your plots
         _fig, _axs = plt.subplots(1, 2, figsize=(12,4))
         _ax = _axs[0]
 
-        # _ax.plot(t,x, label=...)
-        # _ax.plot(t,x_2,'--', linewidth=4, label=....)
+        # _ax.plot(t_9,x_3, label=...)
+        # _ax.plot(t_9,x_2,'--', linewidth=4, label=....)
         # _ax.set_ylabel(...)
         # plt.xlabel...)
         _ax = _axs[1]
@@ -816,7 +816,7 @@ def ex_11_09():
         # _ax.set_xlabel(...)
         _fig.tight_layout()
 
-    show(_fig, sol=sol_3, v=v_3, v0=v0, x=x_3, x0=x0, x_2=x_2, dydt=dydt)
+    show(_fig, sol=sol_3, v0=v0, x=x_3, x0=x0, x_2=x_2, dydt=dydt)
 
 
 @app.cell(hide_code=True)

@@ -114,11 +114,11 @@ def ex_13_01():
                     if fixed[_i,_j]:
                         ...
 
-                        #phinew[i,j] = ...
+                        #phinew[_i,_j] = ...
                     else:
                         ...
 
-                        #phinew[i,j] = ....
+                        #phinew[_i,_j] = ....
             #delta_max =....
             delta_max_list.append(delta_max)
             print("N_iter %d delta_max %e\r" % (len(delta_max_list), delta_max), end='')
@@ -287,7 +287,7 @@ def ex_13_03():
                     if not fixed_2[_i,_j]:
                         ...
 
-                        #delta[i,j] = ...
+                        #delta[_i,_j] = ...
             delta_max_2 = np.max(np.abs(delta))
             delta_max_list_2.append(delta_max_2)
             print("N_iter %d delta_max %e\r" % (len(delta_max_list_2), delta_max_2), end='')   
@@ -414,16 +414,18 @@ def ex_13_05():
 
     SOR_parameter = 1.95
     target_accuracy_3 = 1e-4
+    t1_3 = time()
 
     # phi_3 = ...
     # delta_max_list_3 = ...
 
     # Do not edit or remove the boiler-plate code below.
-    if given(delta_max_list_3, phi_3, t2_2):
-        print("\nTotal running time: %.2f min" % ((t2_2-t1_2)/60))
-        print("Code speed: %.1f iterations per second" %(len(delta_max_list_3)/(t2_2-t1_2)))
+    if given(delta_max_list_3, phi_3):
+        _t2 = time()
+        print("\nTotal running time: %.2f min" % ((_t2-t1_3)/60))
+        print("Code speed: %.1f iterations per second" %(len(delta_max_list_3)/(_t2-t1_3)))
 
-    show(delta_max_list=delta_max_list_3, phi=phi_3, t2=t2_2)
+    show(delta_max_list=delta_max_list_3, phi=phi_3)
 
 
 @app.cell(hide_code=True)
@@ -644,13 +646,13 @@ def ex_13_08():
     fixed_3 = np.zeros([M_4,M_4])
     fixed_3[:,:] = False
 
-    # fixed[[___,___,___,___],:] = True
-    # fixed[:,[___,___,___,___]] = True
+    # fixed_3[[___,___,___,___],:] = True
+    # fixed_3[:,[___,___,___,___]] = True
 
     # The external fixed charge
     rho_fixed_2 = np.zeros([M_4,M_4])
 
-    # rho_fixed[___,___] = 1
+    # rho_fixed_2[___,___] = 1
 
     # Set `unfinished_3` to False once you have written the code below, so that it can run.
     unfinished_3 = True
