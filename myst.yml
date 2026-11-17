@@ -133,7 +133,6 @@ project:
             - file: assignments/quantum-mechanics/tunnelling.md
             - file: assignments/quantum-mechanics/scattering.md
             - file: assignments/quantum-mechanics/slit-interference.md
-              hidden: true
         - title: Statistical Physics
           children:
             - file: assignments/statistical-physics/lennard-jones.md
@@ -141,8 +140,6 @@ project:
             - file: assignments/statistical-physics/brownian-motion.md
             - file: assignments/statistical-physics/chemotaxis.md
             - file: assignments/statistical-physics/ion-channels.md
-              hidden: true
-          hidden: true
 
 site:
   template: book-theme
